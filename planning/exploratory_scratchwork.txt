@@ -1,0 +1,205 @@
+if x > y then do1 do2 do3 else doe4 doe5
+print "end"
+
+x y gt
+do3 do2 do1
+
+doStuff :: int -> int
+doStuff {
+
+    a = a + 2
+    a = a * 5
+    print a
+    return a
+
+}
+
+int int -> doStuff ::
+a `a 2 + a := a 5 * a := a print a' int int -> 
+
+
+
+do3 do2 do1 x y gt
+
+5 4 +
+
+(8 + 3) * (20 - 15)
+
+8 3 + 20 15 - *
+
+x = add(8, 3)
+y = sub(20, 15)
+output = mult(x, y)
+
+
+8 3 add x int : store
+
+8 is pushed onto stack
+3 is pushed onto stack
+8 and 3 are popped of stack and added -> 11 is pushed onto stack
+a symbol x is created and assigned a symbol table offset of type unspecified
+type integer is on stack
+x is now of type int
+store
+
+##### types
+########## foundational types
+integer
+boolean
+bit string
+float
+double
+complex
+char (unicode)
+string (unicode)
+named function
+lambda (anonymous function)
+tuple
+vector
+matrix
+macro (sequence of register pushes)
+type
+canvas
+color
+duration
+time
+class
+type class
+special (special values that trigger actions when ingested by operators, like halting recursion in ambiguous interpretations).
+    - stoprecurse
+
+########## extended types
+
+##### null operators
+
+getChar
+getInt
+getX
+
+##### unary operators
+
+sname := 17
+sname 17 : -> relationship(sname, 17)
+(sname, 17) relationship =
+stored 17 at sname
+
+oname :: integer
+oname integer : :
+(oname, integer) relationship :
+logs that oname's register is restricted to only holding integers
+
+: [restrictor] -> a b : -> pops 'a' and 'b', and pushes a 2-tuple (a, b) onto the stack, as well as pushes the 'relationship' type onto the stack
+() -> a () -> pop's 'a', and executes 'a', if it is something that can be executed (i.e. function, lambda, macro)
+const -> a const -> if a is a register, "locks" 'a' so that no new values may ever be assigned to it again
+peek -> a peek -> pops 'a' and then pushes two 'a's onto the stack (effectively pushes an 'a')
+not -> a not -> pop's 'a' and return the logical 'not' of 'a' based on its type, if the operation is defined for 'a's type
+get -> a get -> if a is a primitive type or type for which this operator is defined, it will solicit input from the user and validate that input against this type, pushing it onto the stack.
+            -> if a is a register or register stack, it will
+
+##### binary operators
+
+unm -> a unm -> if 'a' is a number, pops 'a', negates it, and pushes the new value onto the stack.
+:=
++
+- -> a b - -> if both 'a' and 'b' are numbers, pops both, subtracts 'b' from 'a', and pushes the new value
+        -> if 'a' is a number and 'b' is the '-' operator, then it pops both and pushes 'a' then 'unm'
+*
+/
+%
+^
+=
+eq
+:: -> a b :: -> restricts register with name 'a' to only holding values of type 'b'
+and
+or
+xor
+nor
+xnor
+get -> a b get -> get
+is -> a b is -> if 'a' is a value of any kind and 'b' is a type, returns 'true' if 'a' is of type 'b', otherwise returns false.
+
+##### underlying structures
+
+symbol table
+operator table -> (number of operands, vector of
+register
+register stack
+
+##### syntactic sugar
+
+fname:t1->
+
+f: a -> b
+f: (a -> b) -> c
+f: a -> (b -> c)
+
+f: a -> b
+a b -> where a, b are types, pushes type (a->b)
+
+f: (a -> b) -> c
+a b -> c ->
+
+f: a -> (b -> c)
+a b c -> ->
+OR b c -> a swp ->
+
+f: (a -> b) -> (c -> d)
+a b -> c d -> ->
+
+while (x > 8) do {
+    print "hi"
+    print "bye"
+    x++
+}
+
+` value_a value_b value_c value_d ... ` = `value_a `value_b `value_c `value_d `...
+
+while gt x 8 ` "hi" print "bye" print x increment `
+"hi" ` print ` 
+
+main () {
+
+1 2 + 3 *
+
+unit int -> fname ::
+` "hi" print "bye" print 5 7 + ` fname :=
+
+fname
+fname
+fname
+
+int int , int -> f2_name ::
+    ` "in f2" println
+    dupe toString "x: " swap concat println
+    dupe toString "y: " rconcat println
+    + `
+
+8
+12
+f2_name
+()
+
+int int , int -> f3_name ::
+    ` arg1n : = arg2n : =
+    "in f3" println
+    arg1n toString "x: " rconcat println
+    arg2n toString "y: " rconcat println
+    arg1n
+    arg2n
+    + `
+
+}
+
+
+f: int, int -> float, string
+
+int int , float string , -> f4_name ::
+    ` arg_a : = arg_b : = ret_1 float : : ret_2 string : :
+    ret_1 arg_a arg_b + toFloat : =
+    ret_2 "I'm returning now with value: " ret_1 toString concat : =
+    ret_1
+    ret_2 `
+    f4_name funcDef
+
+firstArg 5 : = secondArg 20 : =
+f4_name ()
