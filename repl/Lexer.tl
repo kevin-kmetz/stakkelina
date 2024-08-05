@@ -10,7 +10,7 @@
 -- global type Candidate = string|nil
 -- global type TokenType = string|nil
 
-global function lex(chars: string): string|nil
+--[[global function lex(chars: string): string|nil
 
     chars = reduceUntilValid(chars)
     local candidate: string
@@ -23,7 +23,7 @@ end
 
 local function buildCandidate(chars: string): string, string
 
-    local first = getChar(chars)
+    local first = peekLeadingChar(chars)
     local candidate: string
 
     if isQuotationMark(first) then
@@ -36,22 +36,42 @@ local function buildCandidate(chars: string): string, string
         -- error!
     end
 
+end--]]
+
+local function peekLeadingChar(chars: string|nil): string|nil
+    local leadingChar: string|nil = nil
+    if chars ~= nil and chars is string and #chars > 1 then leadingChar = chars:sub(1, 1) end
+    return leadingChar
+end
+
+local function stillHasChars(chars: string|nil): boolean, string|nil
+    local leadingChar = peekLeadingChar(chars)
+    return leadingChar ~= nil and #leadingChar == 1, leadingChar
 end
 
 local function isQuotationMark(char: string): boolean
+    return char == '"' and true or false 
 end
 
 local function isApostrophe(char: string): boolean
+    return char == "'" and true or false
 end
 
-local function isPrintableNonDelimiter(char: string): boolean
+local function isPrintable(char: string): boolean
+    local asciiValue = string.byte(char)
+    return asciiValue >= 33 and asciiValue <= 126
 end
 
-local function buildQuoteString(char: string): string, string
+-- The lexeme delimiters and legal whitespace happen to coincide exactly.
+local function isDelimiter(char: string): boolean
+    return #char == 1 and (char == ' ' or char == '\t')
+end
+
+--[[local function buildQuoteString(char: string): string, string
 end
 
 local function buildQuoteString(char: string): string, string
 end
 
 local function buildRegularCandidate(chars: string): string, string
-end
+end--]]
