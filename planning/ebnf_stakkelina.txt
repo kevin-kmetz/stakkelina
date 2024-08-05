@@ -1,0 +1,89 @@
+# Extended Backus-Naur Form Grammar for Stakkelina
+# 
+# This is way too comprehensive, and is aspirational.
+# A separate janky barebones EBNF grammar will be used
+# to get something going quickly. I need that
+# instant gratification!
+
+statement ::= operand |
+              operator |
+              line_comment |
+              block_comment |
+
+operator ::= function_operator |
+             symbolic_operator |
+
+operand ::= literal | variable | macro
+
+function_operator ::= predefined_function_operator |
+                      user_defined_function
+
+symbol_operator = predefined_symbol_operator |
+                  {symbolic_unit} symbolic_unit
+
+literal ::= integer_literal |
+            float_literal |
+            string_literal |
+            boolean_literal |
+            abstract_literal
+
+predefine_symbol_operator ::= '=' |     # equality
+                              ':=' |    # value assignment
+                              '::' |    # type assignment
+                              '::=' |   # type definition
+                              '->' |    # operation return value
+                              '-->' |   # output
+                              '()' |    # function_operator invokation / macro converter
+                              '+' |
+                              '-' |
+                              '*' |
+                              '/' |
+                              '%' |     # modulus operator / integer division remainder
+                              '^' |     # exponentiation / power
+                              '!' |     # 
+                              '$' |     # string-value injector
+                              '#' |     # length operator
+                              '`' |     # macro delimiter / block delimiter
+                              ''' |     # string delimiter
+                              '"' |     # string delimiter
+                              '|' |     # union operator
+                              '...' |   # range operator
+                              ',' |     # tuple operator
+                              '.' |     # namespace operator
+                              '@' |     # breakpoint / warning / message operator
+
+predefined_function_operator ::= 'use' |
+                                 'not' | 'and' | 'or' | 'eq' |
+                                 'nor' | 'nand' | 'xnor' |
+                                 'unm' | 'swap' | 'pop' | 'push?' |
+                                 'func' | 'function' |
+                                 'type' |
+                                 'class' |
+                                 'while' | 'for' | 'until' | 'do' |
+                                 'if' | 'else' | 'elseif' | 'case' |
+                                 'return' | 'break' | 'next' | 'continue' |
+                                 'when' | 'exit' | 'halt' | 'error' |
+                                 'try' | 'catch' | 'throw' |
+                                 'is' | 'isa' | 'isin' | 'in' |
+
+integer_literal ::= ['-'] {'0' ... '9'} ('0' ... '9')
+
+float_literal ::= ['-'] {'0' ... '9'} ('0' ... '9') '.' {'0' ... '9'} ('0' ... '9') ['f']
+
+string_literal ::= '"' printable_characters '"' |
+                   ''' printable_characters '''
+
+boolean_literal ::= 'true' | 'false'
+
+abstract_literal ::= 'nil' | 'unassigned'
+
+symbolic_unit ::= '!' | '@' | '#' | '$' | '%' |
+                  '*' | '(' | ')' | '[' | ']' |
+                  '-' | '_' | '=' | '+' | '\' |
+                  '|' | ';' | ',' | '.' | '<' |
+                  '>' | '/' | '?' | '~' | '&' |
+                  '{' | '}'
+
+# These are the single apostrophe, the quotation mark, the back tick, and space
+# These are truly the only symbols that cannot be used or overidden in Stakkelina.
+reserved_units ::= ''' | '"' | '`' | ' ' | '<newline>' | '<tab>'

@@ -1,0 +1,48 @@
+# Lexical Grammar for Stakkelina
+
+unit ::= letter | digit | whitespace | <EOF> | 
+
+token ::=  (symbol | number | operator) delimiter
+
+symbol ::= ['_'] { letter } |
+           ['_'] letter { alphanumeric }
+
+number ::= ['-'] digit {digit | '_'} |
+           ['-'] digit {digit | '_'} '.' digit {digit | '_'} ['f'] |
+           ['-'] digit {digit | '_'} ['.'] {digit | '_'}
+
+operator ::= up to 5 ascii symbols of any kind
+
+delimiter ::= <space> | <newline> | <tab> | <EOF>
+
+discard ::= nonwhitespace_unprintable
+
+
+Pseudocode:
+
+    tokenizer/lexer
+        make first pass over source file
+            every time a printable character is encountered at start of file or immediately after a delimiter:
+                start a new token
+                    if not apostrophe or quotation mark
+                        read characters until delimiter
+                    if quotation mark or apostrophe
+                        read until next identical symbol, ignoring delimiters and whitespace
+                        if identical symbol is preceded by backslash, don't terminate next character
+                        if character following close of quoted text is not delimiter, throw error
+                repeat until EOF
+            send token stream to lexical grammar analyzer
+
+    lexical grammar analyzer / lexical validator / lexical analyzer
+        for each token:
+            read the very first character
+                if character is a letter              -> it's a symbol (a named entity)
+                if character is an underscore         -> it's also a symbol
+                if character is a digit               -> it's a number
+                if character is hyphen                -> it's a number
+                if character is quotation mark        -> it's a quoted string
+                if character is apostrophe            -> it's an apostrophe string
+                if character is special character     -> it's an operator
+                if character is delimiter/whitespace  -> discard it
+                if character is unprintable           -> discard it
+            branch into separate reading methods for each until end of token is reached
