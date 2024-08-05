@@ -40,7 +40,7 @@ end--]]
 
 local function peekLeadingChar(chars: string|nil): string|nil
     local leadingChar: string|nil = nil
-    if chars ~= nil and chars is string and #chars > 1 then leadingChar = chars:sub(1, 1) end
+    if chars ~= nil and chars is string and #chars > 0 then leadingChar = chars:sub(1, 1) end
     return leadingChar
 end
 
@@ -75,3 +75,9 @@ end
 
 local function buildRegularCandidate(chars: string): string, string
 end--]]
+
+global function ___enable_testing_Lexer(): boolean
+    global _t_peekLeadingChar = peekLeadingChar
+    global _t_stillHasChars = stillHasChars
+    return true
+end
