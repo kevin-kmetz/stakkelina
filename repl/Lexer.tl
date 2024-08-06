@@ -75,41 +75,38 @@ local function buildCandidateFromQuotationString(chars: string): string, string
     local candidate = '"'
     chars = chars:sub(2)
     local endedWithQuotationMark = false
+    local stillChars, ignoreNextChar = false, false
+    local currentChar: string
 
-    local stillChars, currentChar = stillHasChars(chars)
-    local ignoreNextChar = false
+    if #chars < 1 then error('Malform token encountered - single quote token.') end
 
-    if currentChar == '\\' then ignoreNextChar = true end
-    if not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered.') end
+    repeat
+        stillChars, currentChar = stillHasChars(chars)
+        if not stillChars then error ('Malformed token encountered -  unclosed string token.') end
+        if not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered - invalid character.') end
 
-    if isQuotationMark(currentChar) and not ignoreNextChar then
-        chars = chars:sub(2)
-    end
-
-    while stillChars do
         candidate = candidate .. currentChar
         chars = chars:sub(2)
 
-        ignoreNextChar = false
-        stillChars, currentChar = stillHasChars(chars)
-
-        if currentChar == '\\' then ignoreNextChar = true end
-        if stillChars and not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered.') end
         if isQuotationMark(currentChar) and not ignoreNextChar then
-            candidate = candidate .. currentChar
-            chars = chars:sub(2)
             endedWithQuotationMark = true
             break
         end
 
-    end
+        if currentChar == '\\' and not ignoreNextChar then
+            ignoreNextChar = true
+        else ignoreNextChar = false end
+
+    until not stillChars
 
     if not endedWithQuotationMark then error('Malformed token encountered - unclosed string.') end
 
     stillChars, currentChar = stillHasChars(chars)
-    if stillChars and not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
 
-    if stillChars then chars:sub(2) end
+    if stillChars then
+        if not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
+        chars = chars:sub(2)
+    end
 
     return candidate, chars
 

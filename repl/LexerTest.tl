@@ -181,12 +181,12 @@ test_buildCandidateFromQuotationString = function (): integer
     local r_21, r_22 = t('"        this one too" Did it work?')
     local r_31, r_32 = t('""')
 
-    assert(r_11 == '"Example 1"')
+    assert(r_11 == '"Example 1 here"')
     assert(r_12 == 'and some more stuff')
     assert(r_21 == '"        this one too"')
     assert(r_22 == 'Did it work?')
     assert(r_31 == '""')
-    assert(r_32 == nil)
+    assert(r_32 == '')
 
     local r_41, r_42 = t('"This one has \\" in it" and should have worked')
     local r_51, r_52 = t('"This one has a \' as well" isnt that weird')
@@ -203,27 +203,27 @@ test_buildCandidateFromQuotationString = function (): integer
     assert(r_72 == 'are they showing?')
 
     local r_81, r_82 = t('"\\"Beginning escape" ?????')
-    local r_91, r_92 = t('"An ending escape\"" It should show.')
+    local r_91, r_92 = t('"An ending escape\\"" It should show.')
 
     assert(r_81 == '"\\"Beginning escape"')
     assert(r_82 == '?????')
-    assert(r_91 == '"An ending escape\""')
+    assert(r_91 == '"An ending escape\\""')
     assert(r_92 == 'It should show.')
 
     local r_101, r_102 = t('"Escaping \\ irrelevant characters" nyahaha')
     local r_111, r_112 = t('"An irrelevant at the end \\;" bloop bloop')
-    local r_121, r_122 = t('"An unterminated escape at end\\" anyway, my dude')
+    local r_121, r_122 = t('"An unterminated escape at end\\\\" anyway, my dude')
 
     assert(r_101 == '"Escaping \\ irrelevant characters"')
     assert(r_102 == 'nyahaha')
     assert(r_111 == '"An irrelevant at the end \\;"')
     assert(r_112 == 'bloop bloop')
-    assert(r_121 == '"An unterminated escape at end\\"')
+    assert(r_121 == '"An unterminated escape at end\\\\"')
     assert(r_122 == 'anyway, my dude')
 
     assert(pcall(t, 'needs to start with a quotation mark') == false)
     assert(pcall(t, '"needs to end with one too') == false)
-    assert(pcall(t, '"And do so ignoring a tail escape\"') == false)
+    assert(pcall(t, '"And do so ignoring a tail escape\\"') == false)
 
     assert(pcall(t, '"Bad chars' .. string.char(17) .. ' still should flag"') == false)
 
