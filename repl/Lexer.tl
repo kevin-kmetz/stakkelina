@@ -67,8 +67,68 @@ local function isDelimiter(char: string): boolean
     return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
---local function buildCandidateFromQuotationString(char: string): string, string
---end
+local function buildCandidateFromQuotationString(chars: string): string, string
+
+    -- This functions relies on the first character of the string being passed in to
+    -- already have been accurately determined to a quotation mark, thus no need to check here.
+    --
+    local candidate = '"'
+    chars = chars:sub(2)
+    local endedWithQuotationMark = false
+
+    local stillChars, currentChar = stillHasChars(chars)
+    local ignoreNextChar = false
+
+    if currentChar == '\\' then ignoreNextChar = true end
+    if not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered.') end
+
+    if isQuotationMark(currentChar) and not ignoreNextChar then
+        chars = chars:sub(2)
+    end
+
+    while stillChars do
+        candidate = candidate .. currentChar
+        chars = chars:sub(2)
+
+        ignoreNextChar = false
+        stillChars, currentChar = stillHasChars(chars)
+
+        if currentChar == '\\' then ignoreNextChar = true end
+        if stillChars and not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered.') end
+        if isQuotationMark(currentChar) and not ignoreNextChar then
+            candidate = candidate .. currentChar
+            chars = chars:sub(2)
+            endedWithQuotationMark = true
+            break
+        end
+
+    end
+
+    if not endedWithQuotationMark then error('Malformed token encountered - unclosed string.') end
+
+    stillChars, currentChar = stillHasChars(chars)
+    if stillChars and not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
+
+    if stillChars then chars:sub(2) end
+
+    return candidate, chars
+
+end
+
+-- check character
+--      if ignore toggle is on
+--          if invalid, throw error anyway
+--          add character to candidate
+--          turn ignore toggle off
+--      if ignore toggle is off
+--          if invalid or apostrophe, throw error
+--          if \, then toggle ignore on
+--          
+--
+--
+--
+
+-- if character is \, add to candidate and then toggle ignore on
 
 --local function buildCandidateFromApostropheString(char: string): string, string
 --end
@@ -82,9 +142,11 @@ local function buildCandidate(chars: string): string, string
     while keepScanning do
         candidate = candidate .. currentChar
         chars = chars:sub(2)
+
         keepScanning, currentChar = stillHasChars(chars)
-        if isQuotationMark(currentChar) or isApostrophe(currentChar) then error('Malformed token encountered.') end
-        if not isPrintable(currentChar) then
+        if isQuotationMark(currentChar) or isApostrophe(currentChar) then error('Malformed token encountered - incorrectly placed apostrophe or quotation mark.') end
+
+        if isDelimiter(currentChar) then
             chars = chars:sub(2)
             break
         end
@@ -101,7 +163,7 @@ global function ___enable_testing_Lexer(): boolean
     global _t_isApostrophe                       = isApostrophe
     global _t_isPrintable                        = isPrintable
     global _t_isDelimiter                        = isDelimiter
-    --global _t_buildCandidateFromQuotationString  = buildCandidateFromQuotationString
+    global _t_buildCandidateFromQuotationString  = buildCandidateFromQuotationString
     --global _t_buildCandidateFromApostropheString = buildCandidateFromApostropheString
     global _t_buildCandidate                     = buildCandidate
     return true
