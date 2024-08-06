@@ -67,6 +67,29 @@ local function isDelimiter(char: string): boolean
     return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
+local function buildCandidate(chars: string): string, string
+
+    local candidate = ''
+    local keepScanning, currentChar = stillHasChars(chars)
+    if isQuotationMark(currentChar) or isApostrophe(currentChar) or not isPrintable(currentChar) then error('Malformed token passed in.') end
+
+    while keepScanning do
+        candidate = candidate .. currentChar
+        chars = chars:sub(2)
+
+        keepScanning, currentChar = stillHasChars(chars)
+        if isQuotationMark(currentChar) or isApostrophe(currentChar) then error('Malformed token encountered - incorrectly placed apostrophe or quotation mark.') end
+
+        if isDelimiter(currentChar) then
+            chars = chars:sub(2)
+            break
+        end
+    end
+
+    return candidate, chars
+
+end
+
 local function buildCandidateFromQuotationString(chars: string): string, string
 
     -- This functions relies on the first character of the string being passed in to
@@ -112,41 +135,45 @@ local function buildCandidateFromQuotationString(chars: string): string, string
 
 end
 
--- check character
---      if ignore toggle is on
---          if invalid, throw error anyway
---          add character to candidate
---          turn ignore toggle off
---      if ignore toggle is off
---          if invalid or apostrophe, throw error
---          if \, then toggle ignore on
---          
---
---
---
+local function buildCandidateFromApostropheString(chars: string): string, string
 
--- if character is \, add to candidate and then toggle ignore on
+    -- This functions relies on the first character of the string being passed in to
+    -- already have been accurately determined to an apostrophe mark, thus no need to check here.
+    --
+    local candidate = "'"
+    chars = chars:sub(2)
+    local endedWithApostrophe = false
+    local stillChars, ignoreNextChar = false, false
+    local currentChar: string
 
---local function buildCandidateFromApostropheString(char: string): string, string
---end
+    if #chars < 1 then error('Malform token encountered - single apostrophe token.') end
 
-local function buildCandidate(chars: string): string, string
+    repeat
+        stillChars, currentChar = stillHasChars(chars)
+        if not stillChars then error ('Malformed token encountered -  unclosed string token.') end
+        if not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered - invalid character.') end
 
-    local candidate = ''
-    local keepScanning, currentChar = stillHasChars(chars)
-    if isQuotationMark(currentChar) or isApostrophe(currentChar) or not isPrintable(currentChar) then error('Malformed token passed in.') end
-
-    while keepScanning do
         candidate = candidate .. currentChar
         chars = chars:sub(2)
 
-        keepScanning, currentChar = stillHasChars(chars)
-        if isQuotationMark(currentChar) or isApostrophe(currentChar) then error('Malformed token encountered - incorrectly placed apostrophe or quotation mark.') end
-
-        if isDelimiter(currentChar) then
-            chars = chars:sub(2)
+        if isApostrophe(currentChar) and not ignoreNextChar then
+            endedWithApostrophe = true
             break
         end
+
+        if currentChar == '\\' and not ignoreNextChar then
+            ignoreNextChar = true
+        else ignoreNextChar = false end
+
+    until not stillChars
+
+    if not endedWithApostrophe then error('Malformed token encountered - unclosed string.') end
+
+    stillChars, currentChar = stillHasChars(chars)
+
+    if stillChars then
+        if not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
+        chars = chars:sub(2)
     end
 
     return candidate, chars
@@ -160,8 +187,8 @@ global function ___enable_testing_Lexer(): boolean
     global _t_isApostrophe                       = isApostrophe
     global _t_isPrintable                        = isPrintable
     global _t_isDelimiter                        = isDelimiter
-    global _t_buildCandidateFromQuotationString  = buildCandidateFromQuotationString
-    --global _t_buildCandidateFromApostropheString = buildCandidateFromApostropheString
     global _t_buildCandidate                     = buildCandidate
+    global _t_buildCandidateFromQuotationString  = buildCandidateFromQuotationString
+    global _t_buildCandidateFromApostropheString = buildCandidateFromApostropheString
     return true
 end
