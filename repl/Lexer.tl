@@ -90,63 +90,25 @@ local function buildCandidate(chars: string): string, string
 
 end
 
-local function buildCandidateFromQuotationString(chars: string): string, string
+local function buildCandidateFromString(chars: string, delimiter: string): string, string
 
-    -- This functions relies on the first character of the string being passed in to
-    -- already have been accurately determined to a quotation mark, thus no need to check here.
-    --
-    local candidate = '"'
+    -- First character is guaranteed to be valid, so it can be added without concern.
+    local candidate = '' .. delimiter
     chars = chars:sub(2)
-    local endedWithQuotationMark = false
-    local stillChars, ignoreNextChar = false, false
-    local currentChar: string
+    local isStringDelimiter: function(string): boolean
 
-    if #chars < 1 then error('Malform token encountered - single quote token.') end
-
-    repeat
-        stillChars, currentChar = stillHasChars(chars)
-        if not stillChars then error ('Malformed token encountered -  unclosed string token.') end
-        if not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered - invalid character.') end
-
-        candidate = candidate .. currentChar
-        chars = chars:sub(2)
-
-        if isQuotationMark(currentChar) and not ignoreNextChar then
-            endedWithQuotationMark = true
-            break
-        end
-
-        if currentChar == '\\' and not ignoreNextChar then
-            ignoreNextChar = true
-        else ignoreNextChar = false end
-
-    until not stillChars
-
-    if not endedWithQuotationMark then error('Malformed token encountered - unclosed string.') end
-
-    stillChars, currentChar = stillHasChars(chars)
-
-    if stillChars then
-        if not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
-        chars = chars:sub(2)
+    if isQuotationMark(delimiter) then
+        isStringDelimiter = isQuotationMark
+    elseif isApostrophe(delimiter) then
+        isStringDelimiter = isApostrophe
+    else
+        error('Malformed token encountered - an invalid delimiter.')
     end
 
-    return candidate, chars
-
-end
-
-local function buildCandidateFromApostropheString(chars: string): string, string
-
-    -- This functions relies on the first character of the string being passed in to
-    -- already have been accurately determined to an apostrophe mark, thus no need to check here.
-    --
-    local candidate = "'"
-    chars = chars:sub(2)
-    local endedWithApostrophe = false
-    local stillChars, ignoreNextChar = false, false
+    local endedWithStringDelimiter, stillChars, ignoreNextChar = false, false, false
     local currentChar: string
 
-    if #chars < 1 then error('Malform token encountered - single apostrophe token.') end
+    if #chars < 1 then error('Malformed token encountered - single quote token.') end
 
     repeat
         stillChars, currentChar = stillHasChars(chars)
@@ -156,21 +118,19 @@ local function buildCandidateFromApostropheString(chars: string): string, string
         candidate = candidate .. currentChar
         chars = chars:sub(2)
 
-        if isApostrophe(currentChar) and not ignoreNextChar then
-            endedWithApostrophe = true
+        if isStringDelimiter(currentChar) and not ignoreNextChar then
+            endedWithStringDelimiter = true
             break
         end
 
         if currentChar == '\\' and not ignoreNextChar then
             ignoreNextChar = true
         else ignoreNextChar = false end
-
     until not stillChars
 
-    if not endedWithApostrophe then error('Malformed token encountered - unclosed string.') end
+    if not endedWithStringDelimiter then error('Malformed token encountered - unclosed string.') end
 
     stillChars, currentChar = stillHasChars(chars)
-
     if stillChars then
         if not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
         chars = chars:sub(2)
@@ -188,7 +148,6 @@ global function ___enable_testing_Lexer(): boolean
     global _t_isPrintable                        = isPrintable
     global _t_isDelimiter                        = isDelimiter
     global _t_buildCandidate                     = buildCandidate
-    global _t_buildCandidateFromQuotationString  = buildCandidateFromQuotationString
-    global _t_buildCandidateFromApostropheString = buildCandidateFromApostropheString
+    global _t_buildCandidateFromString           = buildCandidateFromString
     return true
 end

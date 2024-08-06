@@ -67,69 +67,6 @@ local function isDelimiter(char)
    return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
-local function buildCandidateFromQuotationString(chars)
-
-
-
-
-   local candidate = '"'
-   chars = chars:sub(2)
-   local endedWithQuotationMark = false
-   local stillChars, ignoreNextChar = false, false
-   local currentChar
-
-   if #chars < 1 then error('Malform token encountered - single quote token.') end
-
-   repeat
-      stillChars, currentChar = stillHasChars(chars)
-      if not stillChars then error('Malformed token encountered -  unclosed string token.') end
-      if not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered - invalid character.') end
-
-      candidate = candidate .. currentChar
-      chars = chars:sub(2)
-
-      if isQuotationMark(currentChar) and not ignoreNextChar then
-         endedWithQuotationMark = true
-         break
-      end
-
-      if currentChar == '\\' and not ignoreNextChar then
-         ignoreNextChar = true
-      else ignoreNextChar = false end
-
-   until not stillChars
-
-   if not endedWithQuotationMark then error('Malformed token encountered - unclosed string.') end
-
-   stillChars, currentChar = stillHasChars(chars)
-
-   if stillChars then
-      if not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
-      chars = chars:sub(2)
-   end
-
-   return candidate, chars
-
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 local function buildCandidate(chars)
 
    local candidate = ''
@@ -153,6 +90,56 @@ local function buildCandidate(chars)
 
 end
 
+local function buildCandidateFromString(chars, delimiter)
+
+
+   local candidate = '' .. delimiter
+   chars = chars:sub(2)
+   local isStringDelimiter
+
+   if isQuotationMark(delimiter) then
+      isStringDelimiter = isQuotationMark
+   elseif isApostrophe(delimiter) then
+      isStringDelimiter = isApostrophe
+   else
+      error('Malformed token encountered - an invalid delimiter.')
+   end
+
+   local endedWithStringDelimiter, stillChars, ignoreNextChar = false, false, false
+   local currentChar
+
+   if #chars < 1 then error('Malformed token encountered - single quote token.') end
+
+   repeat
+      stillChars, currentChar = stillHasChars(chars)
+      if not stillChars then error('Malformed token encountered -  unclosed string token.') end
+      if not (isPrintable(currentChar) or isDelimiter(currentChar)) then error('Malformed token encountered - invalid character.') end
+
+      candidate = candidate .. currentChar
+      chars = chars:sub(2)
+
+      if isStringDelimiter(currentChar) and not ignoreNextChar then
+         endedWithStringDelimiter = true
+         break
+      end
+
+      if currentChar == '\\' and not ignoreNextChar then
+         ignoreNextChar = true
+      else ignoreNextChar = false end
+   until not stillChars
+
+   if not endedWithStringDelimiter then error('Malformed token encountered - unclosed string.') end
+
+   stillChars, currentChar = stillHasChars(chars)
+   if stillChars then
+      if not isDelimiter(currentChar) then error('Malformed token encounter - trailing characters after string closed.') end
+      chars = chars:sub(2)
+   end
+
+   return candidate, chars
+
+end
+
 function ___enable_testing_Lexer()
    _t_peekLeadingChar = peekLeadingChar
    _t_stillHasChars = stillHasChars
@@ -160,8 +147,7 @@ function ___enable_testing_Lexer()
    _t_isApostrophe = isApostrophe
    _t_isPrintable = isPrintable
    _t_isDelimiter = isDelimiter
-   _t_buildCandidateFromQuotationString = buildCandidateFromQuotationString
-
    _t_buildCandidate = buildCandidate
+   _t_buildCandidateFromString = buildCandidateFromString
    return true
 end

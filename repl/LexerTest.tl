@@ -217,7 +217,9 @@ end
 test_buildCandidateFromQuotationString = function (): integer
 
     io.write('Now running test_buildCandidateFromQuotationString...')
-    local t = _t_buildCandidateFromQuotationString
+    local t = function (chars: string): string, string
+       return  _t_buildCandidateFromString(chars, '"')
+    end
 
     local r_11, r_12 = t('"Example 1 here" and some more stuff')
     local r_21, r_22 = t('"        this one too" Did it work?')
@@ -281,7 +283,9 @@ end
 test_buildCandidateFromApostropheString = function (): integer
 
     io.write('Now running test_buildCandidateFromApostropheString...')
-    local t = _t_buildCandidateFromApostropheString
+    local t = function (chars: string): string, string
+       return  _t_buildCandidateFromString(chars, "'")
+    end
 
     local r_11, r_12 = t("'Example 1 here' and some more stuff")
     local r_21, r_22 = t("'        this one too' Did it work?")
