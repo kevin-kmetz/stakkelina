@@ -64,7 +64,7 @@ end
 
 -- The lexeme delimiters and legal whitespace happen to coincide exactly.
 local function isDelimiter(char: string): boolean
-    return #char == 1 and (char == ' ' or char == '\t')
+    return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
 --[[local function buildQuoteString(char: string): string, string
@@ -77,7 +77,11 @@ local function buildRegularCandidate(chars: string): string, string
 end--]]
 
 global function ___enable_testing_Lexer(): boolean
-    global _t_peekLeadingChar = peekLeadingChar
-    global _t_stillHasChars = stillHasChars
+    global _t_peekLeadingChar   = peekLeadingChar
+    global _t_stillHasChars     = stillHasChars
+    global _t_isQuotationMark   = isQuotationMark
+    global _t_isApostrophe      = isApostrophe
+    global _t_isPrintable       = isPrintable
+    global _t_isDelimiter       = isDelimiter
     return true
 end

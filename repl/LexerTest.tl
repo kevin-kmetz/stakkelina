@@ -1,23 +1,29 @@
 require('Lexer')
 
-local test_run: function(): integer
-local test_peekLeadingChar: function():integer
-local test_stillHasChars: function (): integer
--- function isQuotationMark(char: string): boolean
--- function isApostrophe(char: string): boolean
--- function isPrintable(char: string): boolean
--- function isDelimiter(char: string): boolean
+local test_run:             function (): integer
+local test_peekLeadingChar: function (): integer
+local test_stillHasChars:   function (): integer
+local test_isQuotationMark: function (): integer
+local test_isApostrophe:    function (): integer
+local test_isPrintable:     function (): integer
+local test_isDelimiter:     function (): integer
 
 test_run = function (): integer
+
     print('Enabling testing: ' .. tostring(___enable_testing_Lexer()))
     print('Starting test of Lexer...')
 
     local failureCount = 0
-    failureCount = failureCount + test_peekLeadingChar()
+    test_peekLeadingChar()
     test_stillHasChars()
+    test_isQuotationMark()
+    test_isApostrophe()
+    test_isPrintable()
+    test_isDelimiter()
 
     print('Test of Lexer complete.')
     return failureCount
+
 end
 
 test_peekLeadingChar = function (): integer
@@ -80,6 +86,83 @@ test_stillHasChars = function (): integer
 
     io.write(' passed!\n')
     return 0
+
+end
+
+test_isQuotationMark = function (): integer
+
+    io.write('Now running test_isQuotationMarks...')
+    local t = _t_isQuotationMark
+
+    assert(t('"') == true)
+    assert(t("'") == false)
+    assert(t(" ") == false)
+    assert(t('\'') == false)
+    assert(t('x') == false)
+    assert(t('"') == true)
+
+    io.write(' passed!\n')
+
+end
+
+test_isApostrophe = function (): integer
+
+    io.write('Now running test_isApostrophe...')
+    local t = _t_isApostrophe
+
+    assert(t('"') == false)
+    assert(t("'") == true)
+    assert(t(" ") == false)
+    assert(t('\'') == true)
+    assert(t('x') == false)
+    assert(t('`') == false)
+
+    io.write(' passed!\n')
+
+end
+
+test_isPrintable = function (): integer
+
+    io.write('Now running test_isPrintable...')
+    local t = _t_isPrintable
+
+    assert(t('P') == true)
+    assert(t("q") == true)
+    assert(t('\'') == true)
+    assert(t('8') == true)
+    assert(t('_') == true)
+    assert(t(';') == true)
+
+    assert(t(" ") == false)
+    assert(t('\t') == false)
+    assert(t('\n') == false)
+    assert(t(string.char(5)) == false)
+    assert(t(string.char(255)) == false)
+    assert(t(string.char(127)) == false)
+    assert(t(string.char(5)) == false)
+
+    io.write(' passed!\n')
+
+end
+
+test_isDelimiter = function (): integer
+
+    io.write('Now running test_isDelimiter...')
+    local t = _t_isDelimiter
+
+    assert(t(' ') == true)
+    assert(t("\n") == true)
+    assert(t('\t') == true)
+
+    assert(t("g") == false)
+    assert(t('5') == false)
+    assert(t('') == false)
+    assert(t(string.char(5)) == false)
+    assert(t(string.char(255)) == false)
+    assert(t(string.char(127)) == false)
+    assert(t(string.char(5)) == false)
+
+    io.write(' passed!\n')
 
 end
 

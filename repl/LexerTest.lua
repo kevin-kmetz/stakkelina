@@ -1,23 +1,29 @@
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local io = _tl_compat and _tl_compat.io or io; require('Lexer')
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local assert = _tl_compat and _tl_compat.assert or assert; local io = _tl_compat and _tl_compat.io or io; local string = _tl_compat and _tl_compat.string or string; require('Lexer')
 
 local test_run
 local test_peekLeadingChar
 local test_stillHasChars
-
-
-
-
+local test_isQuotationMark
+local test_isApostrophe
+local test_isPrintable
+local test_isDelimiter
 
 test_run = function()
+
    print('Enabling testing: ' .. tostring(___enable_testing_Lexer()))
    print('Starting test of Lexer...')
 
    local failureCount = 0
-   failureCount = failureCount + test_peekLeadingChar()
+   test_peekLeadingChar()
    test_stillHasChars()
+   test_isQuotationMark()
+   test_isApostrophe()
+   test_isPrintable()
+   test_isDelimiter()
 
    print('Test of Lexer complete.')
    return failureCount
+
 end
 
 test_peekLeadingChar = function()
@@ -80,6 +86,83 @@ test_stillHasChars = function()
 
    io.write(' passed!\n')
    return 0
+
+end
+
+test_isQuotationMark = function()
+
+   io.write('Now running test_isQuotationMarks...')
+   local t = _t_isQuotationMark
+
+   assert(t('"') == true)
+   assert(t("'") == false)
+   assert(t(" ") == false)
+   assert(t('\'') == false)
+   assert(t('x') == false)
+   assert(t('"') == true)
+
+   io.write(' passed!\n')
+
+end
+
+test_isApostrophe = function()
+
+   io.write('Now running test_isApostrophe...')
+   local t = _t_isApostrophe
+
+   assert(t('"') == false)
+   assert(t("'") == true)
+   assert(t(" ") == false)
+   assert(t('\'') == true)
+   assert(t('x') == false)
+   assert(t('`') == false)
+
+   io.write(' passed!\n')
+
+end
+
+test_isPrintable = function()
+
+   io.write('Now running test_isPrintable...')
+   local t = _t_isPrintable
+
+   assert(t('P') == true)
+   assert(t("q") == true)
+   assert(t('\'') == true)
+   assert(t('8') == true)
+   assert(t('_') == true)
+   assert(t(';') == true)
+
+   assert(t(" ") == false)
+   assert(t('\t') == false)
+   assert(t('\n') == false)
+   assert(t(string.char(5)) == false)
+   assert(t(string.char(255)) == false)
+   assert(t(string.char(127)) == false)
+   assert(t(string.char(5)) == false)
+
+   io.write(' passed!\n')
+
+end
+
+test_isDelimiter = function()
+
+   io.write('Now running test_isDelimiter...')
+   local t = _t_isDelimiter
+
+   assert(t(' ') == true)
+   assert(t("\n") == true)
+   assert(t('\t') == true)
+
+   assert(t("g") == false)
+   assert(t('5') == false)
+   assert(t('') == false)
+   assert(t(string.char(5)) == false)
+   assert(t(string.char(255)) == false)
+   assert(t(string.char(127)) == false)
+   assert(t(string.char(5)) == false)
+
+   io.write(' passed!\n')
 
 end
 
