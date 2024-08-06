@@ -64,7 +64,7 @@ end
 
 
 local function isDelimiter(char)
-   return #char == 1 and (char == ' ' or char == '\t')
+   return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
 
@@ -73,11 +73,36 @@ end
 
 
 
+local function buildCandidate(chars)
 
+   local candidate = ''
+   local keepScanning, currentChar = stillHasChars(chars)
+   if isQuotationMark(currentChar) or isApostrophe(currentChar) or not isPrintable(currentChar) then error('Malformed token passed in.') end
 
+   while keepScanning do
+      candidate = candidate .. currentChar
+      chars = chars:sub(2)
+      keepScanning, currentChar = stillHasChars(chars)
+      if isQuotationMark(currentChar) or isApostrophe(currentChar) then error('Malformed token encountered.') end
+      if not isPrintable(currentChar) then
+         chars = chars:sub(2)
+         break
+      end
+   end
+
+   return candidate, chars
+
+end
 
 function ___enable_testing_Lexer()
    _t_peekLeadingChar = peekLeadingChar
    _t_stillHasChars = stillHasChars
+   _t_isQuotationMark = isQuotationMark
+   _t_isApostrophe = isApostrophe
+   _t_isPrintable = isPrintable
+   _t_isDelimiter = isDelimiter
+
+
+   _t_buildCandidate = buildCandidate
    return true
 end

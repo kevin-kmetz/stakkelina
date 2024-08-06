@@ -27,11 +27,11 @@ local function buildCandidate(chars: string): string, string
     local candidate: string
 
     if isQuotationMark(first) then
-        candidate, chars = buildQuoteString(chars)
+        candidate, chars = buildCandidateFromQuotationString(chars)
     elseif isApostrophe(first) then
-        candidate, chars = buildApostropheCandidate(chars)
+        candidate, chars = buildCandidateFromApostropheString(chars)
     elseif isPrintableNonDelimiter(first) then
-        candidate, chars = buildRegularCandidate(chars)
+        candidate, chars = builCandidate(chars)
     else
         -- error!
     end
@@ -67,21 +67,42 @@ local function isDelimiter(char: string): boolean
     return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
---[[local function buildQuoteString(char: string): string, string
-end
+--local function buildCandidateFromQuotationString(char: string): string, string
+--end
 
-local function buildQuoteString(char: string): string, string
-end
+--local function buildCandidateFromApostropheString(char: string): string, string
+--end
 
-local function buildRegularCandidate(chars: string): string, string
-end--]]
+local function buildCandidate(chars: string): string, string
+
+    local candidate = ''
+    local keepScanning, currentChar = stillHasChars(chars)
+    if isQuotationMark(currentChar) or isApostrophe(currentChar) or not isPrintable(currentChar) then error('Malformed token passed in.') end
+
+    while keepScanning do
+        candidate = candidate .. currentChar
+        chars = chars:sub(2)
+        keepScanning, currentChar = stillHasChars(chars)
+        if isQuotationMark(currentChar) or isApostrophe(currentChar) then error('Malformed token encountered.') end
+        if not isPrintable(currentChar) then
+            chars = chars:sub(2)
+            break
+        end
+    end
+
+    return candidate, chars
+
+end
 
 global function ___enable_testing_Lexer(): boolean
-    global _t_peekLeadingChar   = peekLeadingChar
-    global _t_stillHasChars     = stillHasChars
-    global _t_isQuotationMark   = isQuotationMark
-    global _t_isApostrophe      = isApostrophe
-    global _t_isPrintable       = isPrintable
-    global _t_isDelimiter       = isDelimiter
+    global _t_peekLeadingChar                    = peekLeadingChar
+    global _t_stillHasChars                      = stillHasChars
+    global _t_isQuotationMark                    = isQuotationMark
+    global _t_isApostrophe                       = isApostrophe
+    global _t_isPrintable                        = isPrintable
+    global _t_isDelimiter                        = isDelimiter
+    --global _t_buildCandidateFromQuotationString  = buildCandidateFromQuotationString
+    --global _t_buildCandidateFromApostropheString = buildCandidateFromApostropheString
+    global _t_buildCandidate                     = buildCandidate
     return true
 end
