@@ -39,11 +39,11 @@ segmentIntoCandidates = function (chars: string): {string}
     if not (#chars > 0) then error('Malformed candidate stream - no characters.') end
     local leadChar: string
     local stillChars: boolean
-    stillChars, leadChar = stillHasChars(chars)
     local candidates: {string} = {}
     local candidate: string
 
     chars = removeLeadingWhitespace(chars)
+    stillChars, leadChar = stillHasChars(chars)
 
     repeat
         if not stillChars then break end

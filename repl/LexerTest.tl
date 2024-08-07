@@ -407,7 +407,7 @@ test_removeLeadingWhitespace = function(): integer
 end
 
 test_segmentIntoCandidates = function(): integer
-    io.write('Now running test_buildCandidateFromApostropheString...')
+    io.write('Now running test_segmentIntoCandidates...')
 
     local t = function(charStream: string, properOutput: {string}): boolean
         local candidates = _t_segmentIntoCandidates(charStream)
@@ -423,34 +423,44 @@ test_segmentIntoCandidates = function(): integer
         assert(tablesAreEqual(candidates, properOutput))
     end
 
-    t('just a test', {'just', 'a', 'test'})
-    print('\nPreliminary lambda table verification passed.')
-
     local s_1 = 'This is a sample string of tokens'
     local s_2 = '      How about this one?'
     local s_3 = '     And    this      one?'
 
     local r_1 = {'This', 'is', 'a', 'sample', 'string', 'of', 'tokens'}
     local r_2 = {'How', 'about', 'this', 'one?'}
-    local r_3 = {'And', 'this', 'one'}
+    local r_3 = {'And', 'this', 'one?'}
+
+    t(s_1, r_1)
+    t(s_2, r_2)
+    t(s_3, r_3)
 
     local s_4 = '\tNow we\t   have tabs'
     local s_5 = '\nWhat\nabout\nnewlines???'
     local s_6 = 'trailing whitespace, is it an issue?     '
-    local s_7 = '\t\t\t\n\n   \nLet\'s really jank this up'
+    local s_7 = '\t\t\t\n\n   \nLets really jank this up'
 
     local r_4 = {'Now', 'we', 'have', 'tabs'}
     local r_5 = {'What', 'about', 'newlines???'}
-    local r_6 = {'trailing', 'whitespace', 'is', 'it', 'an', 'issue?'}
-    local r_7 = {'Let\'s', 'really', 'jank', 'this', 'up'}
+    local r_6 = {'trailing', 'whitespace,', 'is', 'it', 'an', 'issue?'}
+    local r_7 = {'Lets', 'really', 'jank', 'this', 'up'}
+
+    t(s_4, r_4)
+    t(s_5, r_5)
+    t(s_6, r_6)
+    t(s_7, r_7)
 
     local s_8 = 'What about "a quoted string" hmmm?'
     local s_9 = "an 'apostrophe string' should also work"
-    local s_10 = 'Let\'s "mix them" up now \'just like this\' mwahaha'
+    local s_10 = 'Lets "mix them" up now \'just like this\' mwahaha'
 
     local r_8 = {'What', 'about', '"a quoted string"', 'hmmm?'}
     local r_9 = {'an', "'apostrophe string'", 'should', 'also', 'work'}
-    local r_10 = {'Let\'s', '"mix them"', 'up', 'now', '\'just like this\'', 'mwahaha'}
+    local r_10 = {'Lets', '"mix them"', 'up', 'now', '\'just like this\'', 'mwahaha'}
+
+    t(s_8, r_8)
+    t(s_9, r_9)
+    t(s_10, r_10)
 
     local s_11 = '"Starting with a quote" and not ending on one'
     local s_12 = 'Not starting with one but "ending on a quote"'
@@ -458,21 +468,34 @@ test_segmentIntoCandidates = function(): integer
     local r_11 = {'"Starting with a quote"', 'and', 'not', 'ending', 'on', 'one'}
     local r_12 = {'Not', 'starting', 'with', 'one', 'but', '"ending on a quote"'}
 
+    t(s_11, r_11)
+    t(s_12, r_12)
+
     local s_13 = 'Lets see what an ' .. string.char(22) .. ' does here'
     local s_14 = 'How about an un"finished quote'
     local s_15 = 'What about if the quote is in last position"'
     local s_16 = "What if an apo'strophe is unclosed?"
     local s_17 = "Let's try 'two of' apo'strophed"
 
-    local s_18 = 'Lets try one with an escaped\\ space'
-    local s_19 = 'And an escape new\\\nline huh huh?'
-    local s_20 = 'And an esca\\\tped tab wow wow'
+    assert(pcall(_t_segmentIntoCandidates, s_13) == false)
+    assert(pcall(_t_segmentIntoCandidates, s_14) == false)
+    assert(pcall(_t_segmentIntoCandidates, s_15) == false)
+    assert(pcall(_t_segmentIntoCandidates, s_16) == false)
+    assert(pcall(_t_segmentIntoCandidates, s_17) == false)
 
-    local r_18 = {}
-    local r_19 = {}
-    local r_20 = {}
+    local s_18 = 'Lets try one with an "escaped\\ space" now'
+    local s_19 = 'And an escape "new\\\nline" huh huh?'
+    local s_20 = 'And an "esca\\\tped" tab wow wow'
 
-    io.write(' unimplemented.\n')
+    local r_18 = {'Lets', 'try', 'one', 'with', 'an', '"escaped\\ space"', 'now'}
+    local r_19 = {'And', 'an', 'escape', '"new\\\nline"', 'huh', 'huh?'}
+    local r_20 = {'And', 'an', '"esca\\\tped"', 'tab', 'wow', 'wow'}
+
+    t(s_18, r_18)
+    t(s_19, r_19)
+    t(s_20, r_20)
+
+    io.write(' passed!\n')
     return 0
 end
 
