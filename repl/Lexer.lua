@@ -38,6 +38,10 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 
 
 
+
+
+
+
 local function peekLeadingChar(chars)
    local leadingChar = nil
    if chars ~= nil and type(chars) == "string" and #chars > 0 then leadingChar = chars:sub(1, 1) end
@@ -63,8 +67,18 @@ local function isPrintable(char)
 end
 
 
+
 local function isDelimiter(char)
    return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
+end
+
+local isWhitespace = isDelimiter
+
+local function isIllegal(char)
+
+
+   if (string.byte(char) < 33 and not (char == ' ' or char == '\n' or char == '\t')) or char.byte(char) >= 127 then return true end
+   return false
 end
 
 local function buildCandidate(chars)
@@ -147,6 +161,8 @@ function ___enable_testing_Lexer()
    _t_isApostrophe = isApostrophe
    _t_isPrintable = isPrintable
    _t_isDelimiter = isDelimiter
+   _t_isWhitespace = isWhitespace
+   _t_isIllegal = isIllegal
    _t_buildCandidate = buildCandidate
    _t_buildCandidateFromString = buildCandidateFromString
    return true

@@ -19,12 +19,16 @@
 
     return nil
 
-end
+end--]]
 
-local function buildCandidate(chars: string): string, string
+--local segmentIntoCandidate = function (chars:string): string string
+--[[local function segmentIntoCandidates(chars: string): string, string
 
-    local first = peekLeadingChar(chars)
-    local candidate: string
+    local leadChar = peekLeadingChar(chars)
+    local candidates: {string} = {}
+    local candidate
+
+    chars = removeLeadingWhitespace(chars)
 
     if isQuotationMark(first) then
         candidate, chars = buildCandidateFromQuotationString(chars)
@@ -63,8 +67,18 @@ local function isPrintable(char: string): boolean
 end
 
 -- The lexeme delimiters and legal whitespace happen to coincide exactly.
+-- They are thus synonyms, as show below, where isWhiteSpace aliases isDelimiter.
 local function isDelimiter(char: string): boolean
     return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
+end
+
+local isWhitespace = isDelimiter
+
+local function isIllegal(char: string): boolean
+    -- All nonprintable except space, newline, tab are illegal.
+    -- 33 is start of printable, 127 is ASCII for delete, 128 and above is Extend ASCII, which isn't desired.
+    if (string.byte(char) < 33 and not (char == ' ' or char == '\n' or char == '\t')) or char.byte(char) >= 127 then return true end
+    return false
 end
 
 local function buildCandidate(chars: string): string, string
@@ -147,6 +161,8 @@ global function ___enable_testing_Lexer(): boolean
     global _t_isApostrophe                       = isApostrophe
     global _t_isPrintable                        = isPrintable
     global _t_isDelimiter                        = isDelimiter
+    global _t_isWhitespace                       = isWhitespace
+    global _t_isIllegal                          = isIllegal
     global _t_buildCandidate                     = buildCandidate
     global _t_buildCandidateFromString           = buildCandidateFromString
     return true

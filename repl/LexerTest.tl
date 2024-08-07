@@ -7,9 +7,12 @@ local test_isQuotationMark:                         function (): integer
 local test_isApostrophe:                            function (): integer
 local test_isPrintable:                             function (): integer
 local test_isDelimiter:                             function (): integer
+local test_isIllegal:                               function (): integer
 local test_buildCandidate:                          function (): integer
 local test_buildCandidateFromQuotationString:       function (): integer
 local test_buildCandidateFromApostropheString:      function (): integer
+local test_removeLeadingWhitespace:                 function (): integer
+local test_segmentIntoCandidates:                   function (): integer
 
 test_run = function (): integer
 
@@ -23,9 +26,12 @@ test_run = function (): integer
     test_isApostrophe()
     test_isPrintable()
     test_isDelimiter()
+    test_isIllegal()
     test_buildCandidate()
     test_buildCandidateFromQuotationString()
     test_buildCandidateFromApostropheString()
+    test_removeLeadingWhitespace()
+    test_segmentIntoCandidates()
 
     print('Test of Lexer complete.')
     return failureCount
@@ -155,6 +161,7 @@ test_isDelimiter = function (): integer
 
     io.write('Now running test_isDelimiter...')
     local t = _t_isDelimiter
+    local s = _t_isWhitespace
 
     assert(t(' ') == true)
     assert(t("\n") == true)
@@ -167,6 +174,41 @@ test_isDelimiter = function (): integer
     assert(t(string.char(255)) == false)
     assert(t(string.char(127)) == false)
     assert(t(string.char(5)) == false)
+
+    assert(s(' ') == true)
+    assert(s("\n") == true)
+    assert(s('\t') == true)
+
+    assert(s("g") == false)
+    assert(s('5') == false)
+    assert(s('') == false)
+    assert(s(string.char(5)) == false)
+    assert(s(string.char(255)) == false)
+    assert(s(string.char(127)) == false)
+    assert(s(string.char(5)) == false)
+
+    io.write(' passed!\n')
+
+end
+
+test_isIllegal = function (): integer
+
+    io.write('Now running test_isIllegal...')
+    local t = _t_isIllegal
+
+    assert(t(string.char(22)) == true)
+    assert(t(string.char(6)) == true)
+    assert(t(string.char(127)) == true)
+    assert(t(string.char(180)) == true)
+    assert(t(string.char(255)) == true)
+
+    assert(t("g") == false)
+    assert(t('5') == false)
+    assert(t('X') == false)
+    assert(t('\n') == false)
+    assert(t('\t') == false)
+    assert(t(' ') == false)
+    assert(t('}') == false)
 
     io.write(' passed!\n')
 
@@ -344,6 +386,16 @@ test_buildCandidateFromApostropheString = function (): integer
 
     io.write(' passed!\n')
 
+end
+
+test_removeLeadingWhitespace = function(): integer
+    io.write('Now running test_removeLeadingWhitespace...')
+    io.write(' unimplemented.\n')
+end
+
+test_segmentIntoCandidates = function(): integer
+    io.write('Now running test_buildCandidateFromApostropheString...')
+    io.write(' unimplemented.\n')
 end
 
 return test_run()
