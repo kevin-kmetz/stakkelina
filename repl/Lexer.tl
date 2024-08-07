@@ -21,67 +21,100 @@
 
 end--]]
 
---local segmentIntoCandidate = function (chars:string): string string
---[[local function segmentIntoCandidates(chars: string): string, string
+local peekLeadingChar:          function (chars: string): string|nil
+local stillHasChars:            function (chars: string): boolean, string|nil
+local isQuotationMark:          function (chars: string): boolean 
+local isApostrophe:             function (chars: string): boolean
+local isPrintable:              function (chars: string): boolean
+local isDelimiter:              function (chars: string): boolean
+local isWhitespace:             function (chars: string): boolean
+local isIllegal:                function (chars: string): boolean
+local buildCandidate:           function (chars: string): string, string 
+local buildCandidateFromString: function (chars: string, delimiter: string): string, string
+local removeLeadingWhitespace:  function (chars: string): string
+local segmentIntoCandidates:    function (chars: string): {string}
 
-    local leadChar = peekLeadingChar(chars)
+--local segmentIntoCandidate = function (chars:string): string string
+segmentIntoCandidates = function (chars: string): {string}
+
+    local leadChar: string
+    if not (#leadChar > 0) then error('Malformed candidate stream - no characters.') end
     local candidates: {string} = {}
-    local candidate
+    local candidate: string
+    local stillChars: boolean
 
     chars = removeLeadingWhitespace(chars)
+    stillChars, leadChar = stillHasChars(chars)
 
-    if isQuotationMark(first) then
-        candidate, chars = buildCandidateFromQuotationString(chars)
-    elseif isApostrophe(first) then
-        candidate, chars = buildCandidateFromApostropheString(chars)
-    elseif isPrintableNonDelimiter(first) then
-        candidate, chars = builCandidate(chars)
-    else
-        -- error!
-    end
+    repeat
+        if not stillChars then break end
 
-end--]]
+        if isQuotationMark(leadChar) then
+            candidate, chars = buildCandidateFromString(chars, '"')
+        elseif isApostrophe(leadChar) then
+            candidate, chars = buildCandidateFromString(chars, "'")
+        elseif isPrintable(leadChar) then
+            candidate, chars = buildCandidate(chars)
+        else
+            error('Malformed candidate stream - either illegal character or exceptional condition.')
+        end
 
-local function peekLeadingChar(chars: string|nil): string|nil
+        table.insert(candidates, candidate)
+        chars = removeLeadingWhitespace(chars)
+        stillChars, leadChar = stillHasChars(chars)
+    until not stillChars
+
+    return candidates
+
+end
+
+peekLeadingChar = function (chars: string|nil): string|nil
     local leadingChar: string|nil = nil
     if chars ~= nil and chars is string and #chars > 0 then leadingChar = chars:sub(1, 1) end
     return leadingChar
 end
 
-local function stillHasChars(chars: string|nil): boolean, string|nil
+stillHasChars = function (chars: string|nil): boolean, string|nil
     local leadingChar = peekLeadingChar(chars)
     return leadingChar ~= nil and #leadingChar == 1, leadingChar
 end
 
-local function isQuotationMark(char: string): boolean
+isQuotationMark = function (char: string): boolean
     return char == '"' and true or false 
 end
 
-local function isApostrophe(char: string): boolean
+isApostrophe = function (char: string): boolean
     return char == "'" and true or false
 end
 
-local function isPrintable(char: string): boolean
+isPrintable = function (char: string): boolean
     local asciiValue = string.byte(char)
     return asciiValue >= 33 and asciiValue <= 126
 end
 
 -- The lexeme delimiters and legal whitespace happen to coincide exactly.
 -- They are thus synonyms, as show below, where isWhiteSpace aliases isDelimiter.
-local function isDelimiter(char: string): boolean
+isDelimiter = function (char: string): boolean
     return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
-local isWhitespace = isDelimiter
+isWhitespace = isDelimiter
 
-local function isIllegal(char: string): boolean
+isIllegal = function (char: string): boolean
     -- All nonprintable except space, newline, tab are illegal.
     -- 33 is start of printable, 127 is ASCII for delete, 128 and above is Extend ASCII, which isn't desired.
     if (string.byte(char) < 33 and not (char == ' ' or char == '\n' or char == '\t')) or char.byte(char) >= 127 then return true end
     return false
 end
 
-local function buildCandidate(chars: string): string, string
+removeLeadingWhitespace = function (chars: string): string
+    -- removeLeadingWhitespace assumes there is a string passed in correctly, even if it is empty.
+    -- Thus a length, even if zero, is guaranteed.
+    while #chars > 0 and isWhitespace(peekLeadingChar(chars)) do chars = chars:sub(2) end
+    return chars
+end
+
+buildCandidate = function (chars: string): string, string
 
     local candidate = ''
     local keepScanning, currentChar = stillHasChars(chars)
@@ -104,7 +137,7 @@ local function buildCandidate(chars: string): string, string
 
 end
 
-local function buildCandidateFromString(chars: string, delimiter: string): string, string
+buildCandidateFromString = function (chars: string, delimiter: string): string, string
 
     -- First character is guaranteed to be valid, so it can be added without concern.
     local candidate = '' .. delimiter
@@ -165,5 +198,6 @@ global function ___enable_testing_Lexer(): boolean
     global _t_isIllegal                          = isIllegal
     global _t_buildCandidate                     = buildCandidate
     global _t_buildCandidateFromString           = buildCandidateFromString
+    global _t_removeLeadingWhitespace            = removeLeadingWhitespace
     return true
 end

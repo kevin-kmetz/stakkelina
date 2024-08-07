@@ -1,4 +1,4 @@
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local string = _tl_compat and _tl_compat.string or string
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local string = _tl_compat and _tl_compat.string or string; local table = _tl_compat and _tl_compat.table or table
 
 
 
@@ -21,67 +21,100 @@ local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 th
 
 
 
+local peekLeadingChar
+local stillHasChars
+local isQuotationMark
+local isApostrophe
+local isPrintable
+local isDelimiter
+local isWhitespace
+local isIllegal
+local buildCandidate
+local buildCandidateFromString
+local removeLeadingWhitespace
+local segmentIntoCandidates
 
 
+segmentIntoCandidates = function(chars)
 
+   local leadChar
+   if not (#leadChar > 0) then error('Malformed candidate stream - no characters.') end
+   local candidates = {}
+   local candidate
+   local stillChars
 
+   chars = removeLeadingWhitespace(chars)
+   stillChars, leadChar = stillHasChars(chars)
 
+   repeat
+      if not stillChars then break end
 
+      if isQuotationMark(leadChar) then
+         candidate, chars = buildCandidateFromString(chars, '"')
+      elseif isApostrophe(leadChar) then
+         candidate, chars = buildCandidateFromString(chars, "'")
+      elseif isPrintable(leadChar) then
+         candidate, chars = buildCandidate(chars)
+      else
+         error('Malformed candidate stream - either illegal character or exceptional condition.')
+      end
 
+      table.insert(candidates, candidate)
+      chars = removeLeadingWhitespace(chars)
+      stillChars, leadChar = stillHasChars(chars)
+   until not stillChars
 
+   return candidates
 
+end
 
-
-
-
-
-
-
-
-
-
-
-
-local function peekLeadingChar(chars)
+peekLeadingChar = function(chars)
    local leadingChar = nil
    if chars ~= nil and type(chars) == "string" and #chars > 0 then leadingChar = chars:sub(1, 1) end
    return leadingChar
 end
 
-local function stillHasChars(chars)
+stillHasChars = function(chars)
    local leadingChar = peekLeadingChar(chars)
    return leadingChar ~= nil and #leadingChar == 1, leadingChar
 end
 
-local function isQuotationMark(char)
+isQuotationMark = function(char)
    return char == '"' and true or false
 end
 
-local function isApostrophe(char)
+isApostrophe = function(char)
    return char == "'" and true or false
 end
 
-local function isPrintable(char)
+isPrintable = function(char)
    local asciiValue = string.byte(char)
    return asciiValue >= 33 and asciiValue <= 126
 end
 
 
 
-local function isDelimiter(char)
+isDelimiter = function(char)
    return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
 end
 
-local isWhitespace = isDelimiter
+isWhitespace = isDelimiter
 
-local function isIllegal(char)
+isIllegal = function(char)
 
 
    if (string.byte(char) < 33 and not (char == ' ' or char == '\n' or char == '\t')) or char.byte(char) >= 127 then return true end
    return false
 end
 
-local function buildCandidate(chars)
+removeLeadingWhitespace = function(chars)
+
+
+   while #chars > 0 and isWhitespace(peekLeadingChar(chars)) do chars = chars:sub(2) end
+   return chars
+end
+
+buildCandidate = function(chars)
 
    local candidate = ''
    local keepScanning, currentChar = stillHasChars(chars)
@@ -104,7 +137,7 @@ local function buildCandidate(chars)
 
 end
 
-local function buildCandidateFromString(chars, delimiter)
+buildCandidateFromString = function(chars, delimiter)
 
 
    local candidate = '' .. delimiter
@@ -165,5 +198,6 @@ function ___enable_testing_Lexer()
    _t_isIllegal = isIllegal
    _t_buildCandidate = buildCandidate
    _t_buildCandidateFromString = buildCandidateFromString
+   _t_removeLeadingWhitespace = removeLeadingWhitespace
    return true
 end

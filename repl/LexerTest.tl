@@ -390,7 +390,19 @@ end
 
 test_removeLeadingWhitespace = function(): integer
     io.write('Now running test_removeLeadingWhitespace...')
-    io.write(' unimplemented.\n')
+    local t = _t_removeLeadingWhitespace
+
+    assert(t('      Gobble gobble gobble') == 'Gobble gobble gobble')
+    assert(t('\n   like zoinks Scoob') == 'like zoinks Scoob')
+    assert(t('\tElephant') == 'Elephant')
+    assert(t('          ') == '')
+
+    assert(t('Shouldn\'t do anything') == 'Shouldn\'t do anything')
+    assert(t('') == '')
+    assert(t(' ') == '')
+    assert(t('sunny day') == 'sunny day')
+
+    io.write(' passed.\n')
 end
 
 test_segmentIntoCandidates = function(): integer
