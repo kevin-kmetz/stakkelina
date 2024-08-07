@@ -34,17 +34,16 @@ local buildCandidateFromString: function (chars: string, delimiter: string): str
 local removeLeadingWhitespace:  function (chars: string): string
 local segmentIntoCandidates:    function (chars: string): {string}
 
---local segmentIntoCandidate = function (chars:string): string string
 segmentIntoCandidates = function (chars: string): {string}
 
+    if not (#chars > 0) then error('Malformed candidate stream - no characters.') end
     local leadChar: string
-    if not (#leadChar > 0) then error('Malformed candidate stream - no characters.') end
+    local stillChars: boolean
+    stillChars, leadChar = stillHasChars(chars)
     local candidates: {string} = {}
     local candidate: string
-    local stillChars: boolean
 
     chars = removeLeadingWhitespace(chars)
-    stillChars, leadChar = stillHasChars(chars)
 
     repeat
         if not stillChars then break end
@@ -95,7 +94,7 @@ end
 -- The lexeme delimiters and legal whitespace happen to coincide exactly.
 -- They are thus synonyms, as show below, where isWhiteSpace aliases isDelimiter.
 isDelimiter = function (char: string): boolean
-    return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
+    return char == ' ' or char == '\t' or char == '\n'
 end
 
 isWhitespace = isDelimiter
@@ -199,5 +198,6 @@ global function ___enable_testing_Lexer(): boolean
     global _t_buildCandidate                     = buildCandidate
     global _t_buildCandidateFromString           = buildCandidateFromString
     global _t_removeLeadingWhitespace            = removeLeadingWhitespace
+    global _t_segmentIntoCandidates              = segmentIntoCandidates
     return true
 end

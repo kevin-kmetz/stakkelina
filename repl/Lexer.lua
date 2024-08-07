@@ -34,17 +34,16 @@ local buildCandidateFromString
 local removeLeadingWhitespace
 local segmentIntoCandidates
 
-
 segmentIntoCandidates = function(chars)
 
+   if not (#chars > 0) then error('Malformed candidate stream - no characters.') end
    local leadChar
-   if not (#leadChar > 0) then error('Malformed candidate stream - no characters.') end
+   local stillChars
+   stillChars, leadChar = stillHasChars(chars)
    local candidates = {}
    local candidate
-   local stillChars
 
    chars = removeLeadingWhitespace(chars)
-   stillChars, leadChar = stillHasChars(chars)
 
    repeat
       if not stillChars then break end
@@ -95,7 +94,7 @@ end
 
 
 isDelimiter = function(char)
-   return #char == 1 and (char == ' ' or char == '\t' or char == '\n')
+   return char == ' ' or char == '\t' or char == '\n'
 end
 
 isWhitespace = isDelimiter
@@ -199,5 +198,6 @@ function ___enable_testing_Lexer()
    _t_buildCandidate = buildCandidate
    _t_buildCandidateFromString = buildCandidateFromString
    _t_removeLeadingWhitespace = removeLeadingWhitespace
+   _t_segmentIntoCandidates = segmentIntoCandidates
    return true
 end

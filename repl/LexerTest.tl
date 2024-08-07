@@ -402,12 +402,78 @@ test_removeLeadingWhitespace = function(): integer
     assert(t(' ') == '')
     assert(t('sunny day') == 'sunny day')
 
-    io.write(' passed.\n')
+    io.write(' passed!\n')
+    return 0
 end
 
 test_segmentIntoCandidates = function(): integer
     io.write('Now running test_buildCandidateFromApostropheString...')
+
+    local t = function(charStream: string, properOutput: {string}): boolean
+        local candidates = _t_segmentIntoCandidates(charStream)
+        assert(#candidates == #properOutput)
+
+        local function tablesAreEqual(tblA: {string}, tblB: {string}): boolean
+            for i = 1, #tblA do
+                assert(tblA[i] == tblB[i])
+            end
+            return true
+        end
+
+        assert(tablesAreEqual(candidates, properOutput))
+    end
+
+    t('just a test', {'just', 'a', 'test'})
+    print('\nPreliminary lambda table verification passed.')
+
+    local s_1 = 'This is a sample string of tokens'
+    local s_2 = '      How about this one?'
+    local s_3 = '     And    this      one?'
+
+    local r_1 = {'This', 'is', 'a', 'sample', 'string', 'of', 'tokens'}
+    local r_2 = {'How', 'about', 'this', 'one?'}
+    local r_3 = {'And', 'this', 'one'}
+
+    local s_4 = '\tNow we\t   have tabs'
+    local s_5 = '\nWhat\nabout\nnewlines???'
+    local s_6 = 'trailing whitespace, is it an issue?     '
+    local s_7 = '\t\t\t\n\n   \nLet\'s really jank this up'
+
+    local r_4 = {'Now', 'we', 'have', 'tabs'}
+    local r_5 = {'What', 'about', 'newlines???'}
+    local r_6 = {'trailing', 'whitespace', 'is', 'it', 'an', 'issue?'}
+    local r_7 = {'Let\'s', 'really', 'jank', 'this', 'up'}
+
+    local s_8 = 'What about "a quoted string" hmmm?'
+    local s_9 = "an 'apostrophe string' should also work"
+    local s_10 = 'Let\'s "mix them" up now \'just like this\' mwahaha'
+
+    local r_8 = {'What', 'about', '"a quoted string"', 'hmmm?'}
+    local r_9 = {'an', "'apostrophe string'", 'should', 'also', 'work'}
+    local r_10 = {'Let\'s', '"mix them"', 'up', 'now', '\'just like this\'', 'mwahaha'}
+
+    local s_11 = '"Starting with a quote" and not ending on one'
+    local s_12 = 'Not starting with one but "ending on a quote"'
+
+    local r_11 = {'"Starting with a quote"', 'and', 'not', 'ending', 'on', 'one'}
+    local r_12 = {'Not', 'starting', 'with', 'one', 'but', '"ending on a quote"'}
+
+    local s_13 = 'Lets see what an ' .. string.char(22) .. ' does here'
+    local s_14 = 'How about an un"finished quote'
+    local s_15 = 'What about if the quote is in last position"'
+    local s_16 = "What if an apo'strophe is unclosed?"
+    local s_17 = "Let's try 'two of' apo'strophed"
+
+    local s_18 = 'Lets try one with an escaped\\ space'
+    local s_19 = 'And an escape new\\\nline huh huh?'
+    local s_20 = 'And an esca\\\tped tab wow wow'
+
+    local r_18 = {}
+    local r_19 = {}
+    local r_20 = {}
+
     io.write(' unimplemented.\n')
+    return 0
 end
 
 return test_run()
