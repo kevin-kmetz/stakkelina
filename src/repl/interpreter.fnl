@@ -13,6 +13,18 @@
 ;;   semicolon              -> comment
 ;;   asperand               -> annotation | metadata
 
+(fn has-chars? [cursor char-stream]
+  (>= (length char-stream) cursor))
+
+(fn char-at [index string_]
+  (if (and (>= index 1)
+           (<= index (length string_)))
+    (string.sub string_ index index)
+    nil))
+
+(fn inc [number]
+  (+ 1 number))
+
 (fn whitespace? [char]
   (case char
     "\n" true
@@ -45,7 +57,7 @@
   (= ";" char))
 
 (fn peek-char [char-stream]
-  (string.sub char-stream 1 1))
+  (char-at 1 char-stream))
 
 (fn peek-token [char-stream]
   nil)
@@ -64,18 +76,39 @@
       _                             :symbol)
   nil))
 
-(fn get-token [char-stream]
-  nil)
+;; Essentially, look for the next index of a whitespace char followed
+;; by a non-whitespace char, plus one. Can be done with string patterns
+;; but nah.
+;;
+;; The function assumes the cursor is pointing at an index beyond the most
+;; recenty lexed segment.
+;;
+;; Yeeeeeehaaaaaw! Tail call optimization/recursion!
+(fn next-token-index [cursor char-stream]
+  (case (char-at cursor char-stream)
+    (where c (whitespace? c)) (let [next-pos (inc cursor)]
+                                (if (not (whitespace? (char-at next-pos char-stream)))
+                                  next-pos
+                                  (next-token-index next-pos char-stream)))
+    (where _ (not (has-chars? cursor char-stream))) nil
+    _ cursor))
 
-{:whitespace?     whitespace?
- :digit?          digit?
- :apostrophe?     apostrophe?
- :colon?          colon?
- :quotation-mark? quotation-mark?
- :hyphen?         hyphen?
- :asperand?       asperand?
- :semicolon?      semicolon?
- :peek-char       peek-char
- :peek-token      peek-token
- :token-type      token-type
- :get-token       get-token}
+(fn get-next-token []
+ "nothing")
+
+{:has-chars?       has-chars?
+ :char-at          char-at
+ :inc              inc
+ :whitespace?      whitespace?
+ :digit?           digit?
+ :apostrophe?      apostrophe?
+ :colon?           colon?
+ :quotation-mark?  quotation-mark?
+ :hyphen?          hyphen?
+ :asperand?        asperand?
+ :semicolon?       semicolon?
+ :peek-char        peek-char
+ :peek-token       peek-token
+ :token-type       token-type
+ :next-token-index next-token-index
+ :get-next-token   get-next-token}
