@@ -16,6 +16,9 @@
 (fn has-chars? [cursor char-stream]
   (>= (length char-stream) cursor))
 
+(fn eof? [cursor char-stream]
+  (not (has-chars? cursor char-stream)))
+
 (fn char-at [index string_]
   (if (and (>= index 1)
            (<= index (length string_)))
@@ -24,6 +27,12 @@
 
 (fn inc [number]
   (+ 1 number))
+
+(fn dec [number]
+  (- number 1))
+
+(fn nil? [value]
+  (= nil value))
 
 (fn whitespace? [char]
   (case char
@@ -59,9 +68,6 @@
 (fn peek-char [char-stream]
   (char-at 1 char-stream))
 
-(fn peek-token [char-stream]
-  nil)
-
 (fn token-type [char-stream]
   (if (> (length char-stream) 0)
     (case (peek-char char-stream)
@@ -93,12 +99,28 @@
     (where _ (not (has-chars? cursor char-stream))) nil
     _ cursor))
 
-(fn get-next-token []
- "nothing")
+(fn token-at [cursor char-stream cur-pos]
+ "Returns the portion of the token from the specified index to whitespace or EOF.
+  Returns nil if no token is present at the index."
+  (let [position (if (nil? cur-pos)
+                   cursor
+                   cur-pos)
+        cur-char (char-at position char-stream)]
+    (if (or (eof? position char-stream)
+            (whitespace? cur-char char-stream))
+      (if (= cursor position)
+        nil
+        (string.sub char-stream
+                    cursor
+                    (dec position)))
+      (token-at cursor char-stream (inc position)))))
 
 {:has-chars?       has-chars?
+ :eof?             eof?
  :char-at          char-at
  :inc              inc
+ :dec              dec
+ :nil?             nil?
  :whitespace?      whitespace?
  :digit?           digit?
  :apostrophe?      apostrophe?
@@ -108,7 +130,6 @@
  :asperand?        asperand?
  :semicolon?       semicolon?
  :peek-char        peek-char
- :peek-token       peek-token
  :token-type       token-type
  :next-token-index next-token-index
- :get-next-token   get-next-token}
+ :token-at         token-at}
