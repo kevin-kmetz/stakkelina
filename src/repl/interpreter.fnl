@@ -16,6 +16,9 @@
 (fn has-chars? [cursor char-stream]
   (>= (length char-stream) cursor))
 
+(fn eof [char-stream]
+  (+ 1 (length char-stream)))
+
 (fn eof? [cursor char-stream]
   (not (has-chars? cursor char-stream)))
 
@@ -96,7 +99,7 @@
                                 (if (not (whitespace? (char-at next-pos char-stream)))
                                   next-pos
                                   (next-token-index next-pos char-stream)))
-    (where _ (not (has-chars? cursor char-stream))) nil
+    (where _ (not (has-chars? cursor char-stream))) (eof char-stream)
     _ cursor))
 
 (fn token-at [cursor char-stream cur-pos]
@@ -115,7 +118,21 @@
                     (dec position)))
       (token-at cursor char-stream (inc position)))))
 
+(fn token-iterator [char-stream]
+  "Returns a closure that iteratively provides tokens from a character
+   stream until either all tokens have been exhausted or an error has
+   been encountered."
+  (var cursor (next-token-index 1 char-stream))
+  (lambda []
+    (if (not (eof? cursor char-stream))
+      (let [token (token-at cursor char-stream)
+            token-length (length token)]
+        (set cursor (next-token-index (+ cursor token-length) char-stream))
+        token)
+      nil)))
+
 {:has-chars?       has-chars?
+ :eof              eof
  :eof?             eof?
  :char-at          char-at
  :inc              inc
@@ -132,4 +149,5 @@
  :peek-char        peek-char
  :token-type       token-type
  :next-token-index next-token-index
- :token-at         token-at}
+ :token-at         token-at
+ :token-iterator   token-iterator}
