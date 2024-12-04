@@ -1,6 +1,9 @@
-;; repl/interpreter.fnl
+;; stakkelina/lexer.fnl
 ;;
-;; A preliminary interpreter for the Stakkelina language.
+;; A lexer for the Stakkelina language.
+;;
+;; The process is as follows:
+;;   lexer -> tokenizer -> parser -> (interpreter) -> (repl | compiler)
 
 ;; Char possibilities:
 ;;
@@ -71,7 +74,9 @@
 (fn peek-char [char-stream]
   (char-at 1 char-stream))
 
-(fn token-type [char-stream]
+;; This needs to be refactored, as it doesn't match the
+;; existing paradigm I've been implementing.
+(fn anticipated-token-type [char-stream]
   (if (> (length char-stream) 0)
     (case (peek-char char-stream)
       (where c (whitespace? c))     :whitespace
@@ -93,18 +98,18 @@
 ;; recenty lexed segment.
 ;;
 ;; Yeeeeeehaaaaaw! Tail call optimization/recursion!
-(fn next-token-index [cursor char-stream]
+(fn next-lexeme-index [cursor char-stream]
   (case (char-at cursor char-stream)
     (where c (whitespace? c)) (let [next-pos (inc cursor)]
                                 (if (not (whitespace? (char-at next-pos char-stream)))
                                   next-pos
-                                  (next-token-index next-pos char-stream)))
+                                  (next-lexeme-index next-pos char-stream)))
     (where _ (not (has-chars? cursor char-stream))) (eof char-stream)
     _ cursor))
 
-(fn token-at [cursor char-stream cur-pos]
- "Returns the portion of the token from the specified index to whitespace or EOF.
-  Returns nil if no token is present at the index."
+(fn lexeme-at [cursor char-stream cur-pos]
+ "Returns the portion of the lexeme from the specified index to whitespace or EOF.
+  Returns nil if no lexeme is present at the index."
   (let [position (if (nil? cur-pos)
                    cursor
                    cur-pos)
@@ -116,38 +121,38 @@
         (string.sub char-stream
                     cursor
                     (dec position)))
-      (token-at cursor char-stream (inc position)))))
+      (lexeme-at cursor char-stream (inc position)))))
 
-(fn token-iterator [char-stream]
-  "Returns a closure that iteratively provides tokens from a character
-   stream until either all tokens have been exhausted or an error has
+(fn lexeme-iterator [char-stream]
+  "Returns a closure that iteratively provides lexemes from a character
+   stream until either all lexemes have been exhausted or an error has
    been encountered."
-  (var cursor (next-token-index 1 char-stream))
+  (var cursor (next-lexeme-index 1 char-stream))
   (lambda []
     (if (not (eof? cursor char-stream))
-      (let [token (token-at cursor char-stream)
-            token-length (length token)]
-        (set cursor (next-token-index (+ cursor token-length) char-stream))
-        token)
+      (let [lexeme (lexeme-at cursor char-stream)
+            lexeme-length (length lexeme)]
+        (set cursor (next-lexeme-index (+ cursor lexeme-length) char-stream))
+        lexeme)
       nil)))
 
-{:has-chars?       has-chars?
- :eof              eof
- :eof?             eof?
- :char-at          char-at
- :inc              inc
- :dec              dec
- :nil?             nil?
- :whitespace?      whitespace?
- :digit?           digit?
- :apostrophe?      apostrophe?
- :colon?           colon?
- :quotation-mark?  quotation-mark?
- :hyphen?          hyphen?
- :asperand?        asperand?
- :semicolon?       semicolon?
- :peek-char        peek-char
- :token-type       token-type
- :next-token-index next-token-index
- :token-at         token-at
- :token-iterator   token-iterator}
+{:has-chars?             has-chars?
+ :eof                    eof
+ :eof?                   eof?
+ :char-at                char-at
+ :inc                    inc
+ :dec                    dec
+ :nil?                   nil?
+ :whitespace?            whitespace?
+ :digit?                 digit?
+ :apostrophe?            apostrophe?
+ :colon?                 colon?
+ :quotation-mark?        quotation-mark?
+ :hyphen?                hyphen?
+ :asperand?              asperand?
+ :semicolon?             semicolon?
+ :peek-char              peek-char
+ :anticipated-token-type anticipated-token-type
+ :next-lexeme-index      next-lexeme-index
+ :lexeme-at              lexeme-at
+ :lexeme-iterator        lexeme-iterator}

@@ -1,0 +1,21 @@
+;; src/examples/hello-stakkelina.stk
+;;
+;; A simple intro program to Stakkelina.
+
+"Hello, Stakkelina!" println
+
+4 alpha let
+30 beta let
+200 gamma let
+1000 delta let
+
+"There are many ways to do things in Stakkelina," println
+"As the stack can be handled in many ways." println
+"Witness 'alpha beta gamma delta + + +' : " print
+alpha beta gamma delta + + + printlnln
+
+"Now compare that to 'alpha beta + gamma + delta +': " print
+alpha beta + gamma + delta + printlnln
+
+"The order in which one structures code in Stakkelina is highly flexible." println
+"Now go an experiment yourself!" printlnln
