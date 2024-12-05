@@ -44,9 +44,16 @@
       (create-token anticipated-type lexeme)
       '[:invalid])))
 
+(fn token-iterator [lexeme-stream]
+  "Returns a closure that iteratively provides tokens from a lexeme
+   stream until either all lexemes have been exhausted or an error has
+   been encountered."
+  (lambda [] (tokenize (lexeme-stream))))
+
 {
   : create-token
   : valid-token-of?
   : anticipated-token-type
   : tokenize
+  : token-iterator
 }
