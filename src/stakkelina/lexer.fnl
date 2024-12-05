@@ -74,22 +74,6 @@
 (fn peek-char [char-stream]
   (char-at 1 char-stream))
 
-;; This needs to be refactored, as it doesn't match the
-;; existing paradigm I've been implementing.
-(fn anticipated-token-type [char-stream]
-  (if (> (length char-stream) 0)
-    (case (peek-char char-stream)
-      (where c (whitespace? c))     :whitespace
-      (where c (digit? c))          :number
-      (where c (apostrophe? c))     :datum
-      (where c (colon? c))          :keyword
-      (where c (quotation-mark? c)) :string
-      (where c (hyphen? c))         :number
-      (where c (asperand? c))       :annotation
-      (where c (semicolon? c))      :comment
-      _                             :symbol)
-  nil))
-
 ;; Essentially, look for the next index of a whitespace char followed
 ;; by a non-whitespace char, plus one. Can be done with string patterns
 ;; but nah.
@@ -108,8 +92,8 @@
     _ cursor))
 
 (fn lexeme-at [cursor char-stream cur-pos]
- "Returns the portion of the lexeme from the specified index to whitespace or EOF.
-  Returns nil if no lexeme is present at the index."
+  "Returns the portion of the lexeme from the specified index to whitespace or EOF.
+   Returns nil if no lexeme is present at the index."
   (let [position (if (nil? cur-pos)
                    cursor
                    cur-pos)
@@ -152,7 +136,6 @@
  :asperand?              asperand?
  :semicolon?             semicolon?
  :peek-char              peek-char
- :anticipated-token-type anticipated-token-type
  :next-lexeme-index      next-lexeme-index
  :lexeme-at              lexeme-at
  :lexeme-iterator        lexeme-iterator}
