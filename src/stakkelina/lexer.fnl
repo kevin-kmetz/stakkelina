@@ -120,22 +120,24 @@
         lexeme)
       nil)))
 
-{:has-chars?             has-chars?
- :eof                    eof
- :eof?                   eof?
- :char-at                char-at
- :inc                    inc
- :dec                    dec
- :nil?                   nil?
- :whitespace?            whitespace?
- :digit?                 digit?
- :apostrophe?            apostrophe?
- :colon?                 colon?
- :quotation-mark?        quotation-mark?
- :hyphen?                hyphen?
- :asperand?              asperand?
- :semicolon?             semicolon?
- :peek-char              peek-char
- :next-lexeme-index      next-lexeme-index
- :lexeme-at              lexeme-at
- :lexeme-iterator        lexeme-iterator}
+{
+  : has-chars?
+  : eof
+  : eof?
+  : char-at
+  : inc
+  : dec
+  : nil?
+  : whitespace?
+  : digit?
+  : apostrophe?
+  : colon?
+  : quotation-mark?
+  : hyphen?
+  : asperand?
+  : semicolon?
+  : peek-char
+  : next-lexeme-index
+  : lexeme-at
+  : lexeme-iterator
+}

@@ -38,7 +38,7 @@
     _                                   :symbol))
 
 {
-  :create-token           create-token
-  :valid-token-of?        valid-token-of?
-  :anticipated-token-type anticipated-token-type
+  : create-token
+  : valid-token-of?
+  : anticipated-token-type
 }
