@@ -8,25 +8,37 @@
   {:token-type token-type
    :representation representation})
 
-(fn valid-number? [candidate]
-  (if (string.match candidate "%--%d*(.%d+)-")
+;; These are very incomplete definitions that are just serving
+;; as prototyping placeholders for now. I should of course just
+;; use LPEG, but I'm considering rolling my own recursive descent
+;; backtracking pattern matcher in vanilla Fennel so that I have
+;; the option of porting it to other languages.
+(local token-type-patterns
+  {:number "^%-?%d*%.?%d+$"
+   :keyword "^%:%w[%w%!%:%^%&%*%?%/%-%+%<%>%|%%]*$"
+   :string "^%\".*%\"$"
+   :comment "^%;.*$"
+   :annotation "^%@%w+$"})
+
+(fn valid-token-of? [token-type candidate]
+  (if (string.match candidate (. token-type-patterns token-type))
     true
     false))
 
 (fn anticipated-token-type [lexeme]
   (case (lexer.peek-char lexeme)
-    (where c (lexeme.whitespace? c))     :whitespace
-    (where c (lexeme.digit? c))          :number
-    (where c (lexeme.apostrophe? c))     :datum
-    (where c (lexeme.colon? c))          :keyword
-    (where c (lexeme.quotation-mark? c)) :string
-    (where c (lexeme.hyphen? c))         :number
-    (where c (lexeme.asperand? c))       :annotation
-    (where c (lexeme.semicolon? c))      :comment
-    _                                    :symbol))
+    (where c (lexer.whitespace? c))     :whitespace
+    (where c (lexer.digit? c))          :number
+    (where c (lexer.apostrophe? c))     :datum
+    (where c (lexer.colon? c))          :keyword
+    (where c (lexer.quotation-mark? c)) :string
+    (where c (lexer.hyphen? c))         :number
+    (where c (lexer.asperand? c))       :annotation
+    (where c (lexer.semicolon? c))      :comment
+    _                                   :symbol))
 
 {
   :create-token           create-token
-  :valid-number?          valid-number?
+  :valid-token-of?        valid-token-of?
   :anticipated-token-type anticipated-token-type
 }
