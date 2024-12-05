@@ -18,7 +18,8 @@
    :keyword "^%:%w[%w%!%:%^%&%*%?%/%-%+%<%>%|%%]*$"
    :string "^%\".*%\"$"
    :comment "^%;.*$"
-   :annotation "^%@%w+$"})
+   :annotation "^%@%w+$"
+   :symbol "^[%w%_][%w%_%!%%%^%&%*%?%<%>%.%-%+%:%|]*$"})
 
 (fn valid-token-of? [token-type candidate]
   (if (string.match candidate (. token-type-patterns token-type))
@@ -37,8 +38,15 @@
     (where c (lexer.semicolon? c))      :comment
     _                                   :symbol))
 
+(fn tokenize [lexeme]
+  (let [anticipated-type (anticipated-token-type lexeme)]
+    (if (valid-token-of? anticipated-type lexeme)
+      (create-token anticipated-type lexeme)
+      '[:invalid])))
+
 {
   : create-token
   : valid-token-of?
   : anticipated-token-type
+  : tokenize
 }
