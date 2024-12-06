@@ -14,7 +14,7 @@
 ;; backtracking pattern matcher in vanilla Fennel so that I have
 ;; the option of porting it to other languages.
 (local token-type-patterns
-  {:number "^%-?%d*%.?%d+$"
+  {:number "^%-?%d+%.?%d*$"
    :keyword "^%:%w[%w%!%:%^%&%*%?%/%-%+%<%>%|%%]*$"
    :string "^%\".*%\"$"
    :comment "^%;.*$"
@@ -48,7 +48,12 @@
   "Returns a closure that iteratively provides tokens from a lexeme
    stream until either all lexemes have been exhausted or an error has
    been encountered."
-  (lambda [] (tokenize (lexeme-stream))))
+  ;;#(tokenize (lexeme-stream)))
+  (lambda []
+    (let [lexeme (lexeme-stream)]
+      (if (lexer.nil? lexeme)
+        nil
+        (tokenize lexeme)))))
 
 {
   : create-token

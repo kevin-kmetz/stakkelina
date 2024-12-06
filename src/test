@@ -1,0 +1,8 @@
+#!/usr/bin/env fennel
+
+(local tests [(require :tests/lexer)
+              (require :tests/tokenizer)])
+
+(each [index test (ipairs tests)]
+  (if (not (= (type test) :string))
+    (test.run)))
