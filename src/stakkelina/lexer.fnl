@@ -107,10 +107,48 @@
                     (dec position)))
       (lexeme-at cursor char-stream (inc position)))))
 
+(fn initialize-cursor [char-stream]
+  "Returns the indice of the very first non-whitespace
+   character in a char-stream."
+  (next-lexeme-index 1 char-stream))
+
+(fn initialize-lexer [char-stream]
+  "Returns the state of initialized lexer for a given char-stream."
+  [char-stream (initialize-cursor char-stream) []])
+
+
+;; I'm aware I could simply do that destructuring in the function
+;; signature itself, but I like having a name to represent the aggregate.
+(fn lex-one [lexer-state]
+  "Takes a vector representing the internal state of a lexer,
+   consisting of a char-stream, cursor, and vector of
+   accumulated lexemes, in that order.
+
+   Assumes that the lexer has already been initialized. In other words,
+   assumes the lexer's cursor has already been initialized, and also
+   assumes the lexer's accumulated lexemes have been initialized (set
+   to empty vector, if empty).
+
+   Returns the resulting lexer-state after lexing a single lexeme."
+  (let [[char-stream cursor accumulated-lexemes] lexer-state]
+    (if (not (eof? cursor char-stream))
+      (let [lexeme (lexeme-at cursor char-stream)
+            lexeme-length (length lexeme)
+            cursor (next-lexeme-index (+ cursor lexeme-length) char-stream)
+            accumulated-lexemes (do (set (. accumulated-lexemes
+                                            (inc (length accumulated-lexemes)))
+                                         lexeme)
+                                    accumulated-lexemes)]
+        [char-stream cursor accumulated-lexemes])
+      (do (set (. lexer-state :END-OF-STREAM) true)
+          lexer-state))))
+
 (fn lexeme-iterator [char-stream]
   "Returns a closure that iteratively provides lexemes from a character
    stream until either all lexemes have been exhausted or an error has
-   been encountered."
+   been encountered.
+
+   The lexemes are lazily computed (as opposed to eagerly)."
   (var cursor (next-lexeme-index 1 char-stream))
   (lambda []
     (if (not (eof? cursor char-stream))
@@ -119,6 +157,17 @@
         (set cursor (next-lexeme-index (+ cursor lexeme-length) char-stream))
         lexeme)
       nil)))
+
+"(fn lex-all [char-stream cursor accumulated-lexemes]
+  (let [cursor (or cursor (next-lexeme-index 1 char-stream))
+        lex-one (lambda [lex-state]
+                  (let [[char-stream cursor accumulated-lexemes] lex-state]
+                    (if (not (eof? cursor char-stream))
+                      (let [lexeme (lexeme-at cursor char-stream)
+                            lexeme-length (length lexeme)
+                            cursor (next-lexeme-index (+ cursor lexeme-length) char-stream)]
+                        )
+                      accumulated-lexemes)))]))"
 
 {
   : has-chars?
@@ -139,5 +188,9 @@
   : peek-char
   : next-lexeme-index
   : lexeme-at
+  : initialize-cursor
+  : initialize-lexer
+  : lex-one
   : lexeme-iterator
+  ;;: lex-all
 }

@@ -6,5 +6,11 @@
    :stack "a stack"
    :heap "a heap"})
 
+(fn evaluate-node [node]
+  nil)
+
+(fn evaluate-sequence [nodes]
+  nil)
+
 (fn interpret [code program-state]
   nil)
