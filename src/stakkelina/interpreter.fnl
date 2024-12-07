@@ -7,4 +7,4 @@
    :heap "a heap"})
 
 (fn interpret [code program-state]
-  ())
+  nil)

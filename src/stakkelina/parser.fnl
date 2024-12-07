@@ -3,7 +3,7 @@
 ;; The functions needed to convert Stakkelina code into
 ;; an abstract syntax tree.
 
-(local builtins (require stakkelina/builtins))
+(local builtins (require :stakkelina/builtins))
 
 (fn token-type [token] (. token :token-type))
 (fn representation [token] (. token :representation))
@@ -15,8 +15,16 @@
     :number {:node-type :literal
              :sub-type  :number
              :value     (tonumber (representation token))}
-    :symbol {:node-type :symbol
+    :symbol (case (builtins.built-in?* token)
+              false {:node-type :symbol
+                     :sub-type  :created
+                     :value     (representation token)}
+              [true func] {:node-type :symbol
+                           :sub-type  :built-in
+                           :value     func})
+    :string {:node-type :literal
+             :sub-type  :string
              :value     (representation token)}
-    :symbol (case (builtins.built-in?* token))
-    () ()
-    () ())
+    _ nil))
+
+{: parse-token}

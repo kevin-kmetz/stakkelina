@@ -2,7 +2,8 @@
 
 (local tests [(require :tests/lexer)
               (require :tests/tokenizer)
-              (require :tests/builtins)])
+              (require :tests/builtins)
+              (require :tests/parser)])
 
 (each [index test (ipairs tests)]
   (if (not (= (type test) :string))
