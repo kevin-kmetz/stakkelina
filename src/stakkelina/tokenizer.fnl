@@ -43,7 +43,7 @@
   (let [anticipated-type (anticipated-token-type lexeme)]
     (if (valid-token-of? anticipated-type lexeme)
       (create-token anticipated-type lexeme)
-      [:invalid])))
+      nil)))
 
 (fn token-iterator [lexeme-iterator]
   "Returns a closure that iteratively provides tokens from a lexeme
@@ -69,7 +69,7 @@
     (while (not= nil current-token)
       (set (. collected-tokens
               (+ 1 (length collected-tokens)))
-           (current-token))
+           current-token)
       (set current-token (token-factory)))
     collected-tokens))
 

@@ -38,7 +38,12 @@
     (pp (tokenizer.tokenize-lexeme-vector lexeme-vector))))
 
 (fn *tokenize-lexeme-iterator []
-  nil)
+  (let [lexer (require :stakkelina/lexer)
+        tokenizer (require :stakkelina/tokenizer)
+        code "alex brittany christine danielle erica francine"
+        lexeme-iterator (lexer.lexeme-iterator code)]
+    (pp code)
+    (pp (tokenizer.tokenize-lexeme-iterator lexeme-iterator))))
 
 (fn *tokenize-all []
   nil)
