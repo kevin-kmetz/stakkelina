@@ -38,27 +38,57 @@
     (where c (lexer.semicolon? c))      :comment
     _                                   :symbol))
 
-(fn tokenize [lexeme]
+(fn tokenize-one [lexeme]
+  "Tokenizes a single lexeme."
   (let [anticipated-type (anticipated-token-type lexeme)]
     (if (valid-token-of? anticipated-type lexeme)
       (create-token anticipated-type lexeme)
-      '[:invalid])))
+      [:invalid])))
 
-(fn token-iterator [lexeme-stream]
+(fn token-iterator [lexeme-iterator]
   "Returns a closure that iteratively provides tokens from a lexeme
    stream until either all lexemes have been exhausted or an error has
    been encountered."
-  ;;#(tokenize (lexeme-stream)))
   (lambda []
-    (let [lexeme (lexeme-stream)]
+    (let [lexeme (lexeme-iterator)]
       (if (lexer.nil? lexeme)
         nil
-        (tokenize lexeme)))))
+        (tokenize-one lexeme)))))
+
+(fn tokenize-lexeme-vector [lexeme-vector]
+  "Takes a vector of lexemes and returns a vector of tokens."
+  (collect [index lexeme (ipairs lexeme-vector)]
+    (tokenize-one lexeme)))
+
+(fn tokenize-lexeme-iterator [lexeme-iterator]
+  "Takes a lexeme-iterator/factory, and eagerly collects all
+   of the tokens generated from it into a token vector."
+  (let [collected-tokens []
+        token-factory (token-iterator lexeme-iterator)]
+    (var current-token (token-factory))
+    (while (not= nil current-token)
+      (set (. collected-tokens
+              (+ 1 (length collected-tokens)))
+           (current-token))
+      (set current-token (token-factory)))
+    collected-tokens))
+
+(fn tokenize-all [lexemes]
+  "Takes either raw code (as a string), a vector of lexemes, or a
+   lexeme-iterator/factory, and returns a vector of tokens."
+  (case (type lexemes)
+    :string (tokenize-lexeme-vector (lexer.lex-all lexemes))
+    :table (tokenize-lexeme-vector lexemes)
+    :function (tokenize-lexeme-iterator lexemes)
+    _  (error "Unhandled exception in function 'tokenize-all'.")))
 
 {
   : create-token
   : valid-token-of?
   : anticipated-token-type
-  : tokenize
+  : tokenize-one
   : token-iterator
+  : tokenize-lexeme-vector
+  : tokenize-lexeme-iterator
+  : tokenize-all
 }

@@ -7,10 +7,10 @@
                " :representation \"" (. token :representation)
                "\"}"))))
 
-(fn *tokenize []
+(fn *tokenize-one []
   (let [tokenizer (require :stakkelina/tokenizer)
-        tokenize tokenizer.tokenize]
-    (print-token (tokenize "anchovy"))))
+        tokenize-one tokenizer.tokenize-one]
+    (print-token (tokenize-one "anchovy"))))
 
 (fn *token-iterator []
   (let [lexer (require :stakkelina/lexer)
@@ -25,7 +25,7 @@
 
 (fn run []
   (print "\n**tests/tokenizer")
-  (print "\n*tokenize") (*tokenize)
+  (print "\n*tokenize-one") (*tokenize-one)
   (print "\n*token-iterator") (*token-iterator))
 
 {: run}
