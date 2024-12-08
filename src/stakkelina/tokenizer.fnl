@@ -57,7 +57,7 @@
 
 (fn tokenize-lexeme-vector [lexeme-vector]
   "Takes a vector of lexemes and returns a vector of tokens."
-  (collect [index lexeme (ipairs lexeme-vector)]
+  (icollect [index lexeme (ipairs lexeme-vector)]
     (tokenize-one lexeme)))
 
 (fn tokenize-lexeme-iterator [lexeme-iterator]
