@@ -46,7 +46,17 @@
     (pp (tokenizer.tokenize-lexeme-iterator lexeme-iterator))))
 
 (fn *tokenize-all []
-  nil)
+  (let [lexer (require :stakkelina/lexer)
+        tokenizer (require :stakkelina/tokenizer)
+        code "albany boise chicago detroit eugene fresno gary"
+        lexeme-vector (lexer.lex-all code)
+        lexeme-factory (lexer.lexeme-iterator code)]
+    (print "Code:" code)
+    (print "Vector:" lexeme-vector)
+    (print "Factory: " lexeme-factory)
+    (print "\nCalled with code:") (pp (tokenizer.tokenize-all code))
+    (print "\nCalled with vector:") (pp (tokenizer.tokenize-all lexeme-vector))
+    (print "\nCalled with factory:") (pp (tokenizer.tokenize-all lexeme-factory))))
 
 (fn run []
   (print "\n**tests/tokenizer")
