@@ -116,6 +116,10 @@
   "Returns the state of initialized lexer for a given char-stream."
   [char-stream (initialize-cursor char-stream) []])
 
+;; The following is a const to refer to the position of the accumulated
+;; lexemes in a lexeme-state - trying to avoid undocumented magic numbers.
+;; I could wrap this in a function call but it really justs punts the number.
+(local ACCUMULATED-LEXEMES 3)
 
 ;; I'm aware I could simply do that destructuring in the function
 ;; signature itself, but I like having a name to represent the aggregate.
@@ -134,11 +138,9 @@
     (if (not (eof? cursor char-stream))
       (let [lexeme (lexeme-at cursor char-stream)
             lexeme-length (length lexeme)
-            cursor (next-lexeme-index (+ cursor lexeme-length) char-stream)
-            accumulated-lexemes (do (set (. accumulated-lexemes
-                                            (inc (length accumulated-lexemes)))
-                                         lexeme)
-                                    accumulated-lexemes)]
+            cursor (next-lexeme-index (+ cursor lexeme-length) char-stream)]
+        (set (. accumulated-lexemes (inc (length accumulated-lexemes)))
+             lexeme)
         [char-stream cursor accumulated-lexemes])
       (do (set (. lexer-state :END-OF-STREAM) true)
           lexer-state))))
@@ -158,16 +160,17 @@
         lexeme)
       nil)))
 
-"(fn lex-all [char-stream cursor accumulated-lexemes]
-  (let [cursor (or cursor (next-lexeme-index 1 char-stream))
-        lex-one (lambda [lex-state]
-                  (let [[char-stream cursor accumulated-lexemes] lex-state]
-                    (if (not (eof? cursor char-stream))
-                      (let [lexeme (lexeme-at cursor char-stream)
-                            lexeme-length (length lexeme)
-                            cursor (next-lexeme-index (+ cursor lexeme-length) char-stream)]
-                        )
-                      accumulated-lexemes)))]))"
+(fn lex-all [char-stream]
+  "Takes a char-stream representing code, and returns a vector
+   of the lexemes constituting the code."
+  (let [lexer-state (initialize-lexer char-stream)]
+    (fn lex-one-and-go [lexer-state]
+       (let [next-state (lex-one lexer-state)
+             {:END-OF-STREAM finish-lexing} next-state]
+          (if finish-lexing
+            (. next-state ACCUMULATED-LEXEMES)
+            (lex-one-and-go next-state))))
+    (lex-one-and-go lexer-state)))
 
 {
   : has-chars?
@@ -192,5 +195,5 @@
   : initialize-lexer
   : lex-one
   : lexeme-iterator
-  ;;: lex-all
+  : lex-all
 }

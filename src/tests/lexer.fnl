@@ -3,7 +3,7 @@
 (local fennel/view (. (require :fennel) :view))
 
 (fn pp [printable]
-  (print (fennel/view printable)))
+  (print (fennel/view printable) "\n"))
 
 (fn *lex-one []
   (let [lexer (require :stakkelina/lexer)
