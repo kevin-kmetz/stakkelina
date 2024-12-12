@@ -1,0 +1,13 @@
+#!/usr/bin/env fennel
+
+(local fennel (require :fennel))
+(set fennel.path (.. fennel.path ";./src/?.fnl;./src/?/init.fnl;"))
+
+(local tests [(require :tests/test_lexer)
+              (require :tests/test_tokenizer)
+              (require :tests/test_builtins)])
+              ;;(require :tests/test_parser)])
+
+(each [index test (ipairs tests)]
+  (if (not (= (type test) :string))
+    (test.run)))
